@@ -1,5 +1,7 @@
 ﻿using MISMC.Model;
+using MISMC.Windows;
 using MyMVVM;
+using SocketAsyncEventArgsOfficeDemo;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,10 +12,22 @@ namespace MISMC.ViewModel
 {
     class MClientViewModel : NotifyObject
     {
-        public MClientViewModel()
+        private MClientViewModel()
         {
-            Mclient = new MClient();
-            Mclient.Connect();
+            Mclient = MClient.CreateInstance("127.0.0.1", "5730");
+            Mclient.ConnectServer();
+        }
+
+        private static MClientViewModel mClientViewModel = null;
+        public static MClientViewModel CreateInstance()
+        {
+            if (mClientViewModel == null)
+            {
+                Console.WriteLine("mClientViewModel创建开始");
+                mClientViewModel = new MClientViewModel();
+                Console.WriteLine("mClientViewModel创建完毕");
+            }
+            return mClientViewModel;
         }
 
         private MClient mclient;
@@ -73,5 +87,25 @@ namespace MISMC.ViewModel
                 return btLogin;
             }
         }
+
+        private MyCommand btRegister;
+        public MyCommand BtRegister
+        {
+            get
+            {
+                if (btRegister == null)
+                    btRegister = new MyCommand(
+                        new Action<object>(
+                            o =>
+                            {
+                                RegisterWindow registerWindow = new RegisterWindow();
+                                registerWindow.Show();
+                            }));
+                return btRegister;
+            }
+        }
+
+        //注册界面的代码
+
     }
 }

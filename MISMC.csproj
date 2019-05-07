@@ -60,6 +60,10 @@
     </ApplicationDefinition>
     <Compile Include="Model\UserInfo.cs" />
     <Compile Include="ViewModel\MClientViewModel.cs" />
+    <Compile Include="ViewModel\RegisterViewModel.cs" />
+    <Compile Include="Windows\RegisterWindow.xaml.cs">
+      <DependentUpon>RegisterWindow.xaml</DependentUpon>
+    </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -72,13 +76,16 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Windows\RegisterWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Model\AsyncUserToken.cs" />
     <Compile Include="Model\BufferManager.cs" />
-    <Compile Include="Model\MClient.cs" />
     <Compile Include="Model\MessageDeal.cs" />
-    <Compile Include="Model\MServer.cs" />
+    <Compile Include="Model\MClient.cs" />
     <Compile Include="Model\SocketAsyncEventArgsPool.cs" />
     <Compile Include="MVVM\MyCommand.cs" />
     <Compile Include="MVVM\MyCommandGeneric.cs" />

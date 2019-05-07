@@ -23,7 +23,13 @@
                 </Button>
             </Grid>
             <Grid >
-                <Button>注册</Button>
+                <Button Content="注册">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="Click">
+                            <c1:MyEventCommand Command="{Binding  BtRegister}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </Button>
             </Grid>
         </StackPanel>
         

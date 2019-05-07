@@ -11,20 +11,19 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace MISMC
+namespace MISMC.Windows
 {
     /// <summary>
-    /// MainWindow.xaml 的交互逻辑
+    /// RegisterWindow.xaml 的交互逻辑
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class RegisterWindow : Window
     {
-        public MainWindow()
+        public RegisterWindow()
         {
             InitializeComponent();
-            this.DataContext = MClientViewModel.CreateInstance();
+            this.DataContext = new RegisterViewModel();
         }
     }
 }
