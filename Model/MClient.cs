@@ -30,6 +30,7 @@ namespace SocketAsyncEventArgsOfficeDemo
         public SocketAsyncEventArgs readSAEA;
         public SocketAsyncEventArgs sendSAEA;
         byte[] receiveBuffer;
+        byte[] sendBuffer;
 
         //可重用的SocketAsyncEventArgs对象池，用于写入、读取和接收套接字操作
         //SocketAsyncEventArgsPool m_readWritePool;
@@ -168,6 +169,7 @@ namespace SocketAsyncEventArgsOfficeDemo
             connSocket.Connect(endPoint);
 
             receiveBuffer = new byte[1024];
+            sendBuffer = new byte[1024];
             
             //因为userToken是同一个,所以设置一个就行
             ((AsyncUserToken)readSAEA.UserToken).Socket = connSocket;
@@ -395,6 +397,7 @@ namespace SocketAsyncEventArgsOfficeDemo
             //接下来可以调用发送函数的回调函数了
             //下一次要发送多少数据
             token.sendPacketNum.Add(packageLen);
+            Console.WriteLine("数据装载完毕");
             ProcessSend(sendSAEA);
         }
 
@@ -405,6 +408,16 @@ namespace SocketAsyncEventArgsOfficeDemo
         //<param name = "e"></param>
         private void ProcessSend(SocketAsyncEventArgs e)
         {
+            //服务端的sendSAEA的Iocomplete没有绑定完成事件，所以服务端SendAsync后不会重复调用ProcessSend
+            //而客户端的绑定了，如果不加下面的跳出函数，会一直循环。
+            //两种方法也说不上谁好，所以客户端先采用与服务端不同的方式，也许后面可以用于发送很大的数据
+            if (((AsyncUserToken)e.UserToken).sendBuffer.Count == 0)
+            {
+                return;
+            }
+
+            Console.WriteLine(e.SocketError);
+
             if (e.SocketError == SocketError.Success)
             {
                 //用来将sendSAEA.UserToken中已经准备好的数据发送出去
@@ -424,8 +437,10 @@ namespace SocketAsyncEventArgsOfficeDemo
                 bool willRaiseEvent = token.Socket.SendAsync(e);
                 if (!willRaiseEvent)
                 {
+                    Console.WriteLine("调用了这个吗?");
                     ProcessSend(e);
                 }
+                Console.WriteLine("异步发送完毕");
             }
             else
             {
