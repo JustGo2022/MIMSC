@@ -11,11 +11,24 @@ namespace MISMC.ViewModel
 {
     class RegisterViewModel : NotifyObject
     {
+        //用来操作mClientViewModel中mServer的注册信息发送函数
         public MClientViewModel mClientViewModel;
 
+        //RegisterViewModel的构造函数
         public RegisterViewModel()
         {
             mClientViewModel = MClientViewModel.CreateInstance();
+        }
+
+        //RegisterViewModel的单例函数
+        private static RegisterViewModel registerViewModel = null;
+        public static RegisterViewModel CreateInstance()
+        {
+            if (registerViewModel == null)
+            {
+                registerViewModel = new RegisterViewModel();
+            }
+            return registerViewModel;
         }
 
         private String username;

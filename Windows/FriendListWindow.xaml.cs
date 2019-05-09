@@ -1,5 +1,4 @@
-﻿using MISMC.ViewModel;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,14 +15,13 @@ using System.Windows.Shapes;
 namespace MISMC.Windows
 {
     /// <summary>
-    /// RegisterWindow.xaml 的交互逻辑
+    /// FriendListWindow.xaml 的交互逻辑
     /// </summary>
-    public partial class RegisterWindow : Window
+    public partial class FriendListWindow : Window
     {
-        public RegisterWindow()
+        public FriendListWindow()
         {
             InitializeComponent();
-            this.DataContext = RegisterViewModel.CreateInstance();
         }
     }
 }

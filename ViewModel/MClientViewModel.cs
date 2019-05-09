@@ -30,6 +30,9 @@ namespace MISMC.ViewModel
             return mClientViewModel;
         }
 
+        //注册窗口实例
+        public RegisterWindow registerWindow { get; set; }
+
         private MClient mclient;
         public MClient Mclient
         {
@@ -82,6 +85,7 @@ namespace MISMC.ViewModel
                         new Action<object>(
                             o =>
                             {
+                                //发送用户名和密码
                                 Mclient.SendLogin(UserName, UserPass);
                             }));
                 return btLogin;
@@ -98,14 +102,18 @@ namespace MISMC.ViewModel
                         new Action<object>(
                             o =>
                             {
-                                RegisterWindow registerWindow = new RegisterWindow();
-                                registerWindow.Show();
+                                //新建一个注册窗口对象
+                                registerWindow = new RegisterWindow();
+                                //隐藏主窗口
+                                APPlication.Current.MainWindow.Hide();
+                                //显示注册窗口并阻塞
+                                registerWindow.ShowDialog();
+                                //显示主窗口
+                                APPlication.Current.MainWindow.Show();
                             }));
                 return btRegister;
             }
         }
-
-        //注册界面的代码
 
     }
 }

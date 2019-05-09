@@ -5,6 +5,9 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using MISMC.Model;
+using MISMC.ViewModel;
+using MISMC.Windows;
 using Newtonsoft.Json.Linq;
 
 namespace SocketAsyncEventArgsOfficeDemo
@@ -15,14 +18,19 @@ namespace SocketAsyncEventArgsOfficeDemo
         public enum messageType
         {
             landMessage = 1,
-            registMessage = 2
+            registMessage = 2,
+            UserInfo = 3,
+            FriendInfo = 4,
+            UserMessage = 5
         }
 
         public static void ReceiveDeal(SocketAsyncEventArgs e)
         {
+            Console.WriteLine("开始粘包处理");
             //粘包处理后，就可以分类处理
             if (StickyDeal(e))
             {
+                Console.WriteLine("数据长度为 : " + ((AsyncUserToken)e.UserToken).packageLen);
                 //如果粘包处理成功，那么就可以开始分类处理
                 Console.WriteLine("开始分类处理");
                 ClassifyDeal(e);
@@ -76,7 +84,6 @@ namespace SocketAsyncEventArgsOfficeDemo
         //对完整的数据进行分类处理
         public static void ClassifyDeal(SocketAsyncEventArgs e)
         {
-            Console.WriteLine("开始分类处理");
             AsyncUserToken token = (AsyncUserToken)e.UserToken;
             messageType type = (messageType)token.packageType;
 
@@ -84,12 +91,28 @@ namespace SocketAsyncEventArgsOfficeDemo
             switch (type)
             {
                 case messageType.landMessage:
-                    Console.WriteLine("登陆信息处理");
+                    Console.WriteLine("登陆返回信息处理");
                     LandMessDeal(e);
                     break;
 
                 case messageType.registMessage:
+                    Console.WriteLine("注册返回信息处理");
                     RegisMessDeal(e);
+                    break;
+
+                case messageType.UserInfo:
+                    Console.WriteLine("返回的该用户信息处理");
+                    UserInfoDeal(e);
+                    break;
+
+                case messageType.FriendInfo:
+                    Console.WriteLine("返回的好友信息处理");
+                    FriendInfoDeal(e);
+                    break;
+
+                case messageType.UserMessage:
+                    Console.WriteLine("返回的用户消息处理");
+                    UserMessageDeal(e);
                     break;
 
                 default:
@@ -114,29 +137,26 @@ namespace SocketAsyncEventArgsOfficeDemo
             String jsonStr = Encoding.Default.GetString(onePackage.ToArray());
             //得到用户名和密码
             JObject obj = JObject.Parse(jsonStr);
-            String userName = obj["UserName"].ToString();
-            String passWord = obj["PassWord"].ToString();
-            MessageBox.Show("登陆消息处理完毕");
-            MessageBox.Show("接收到的用户名和密码：\n"+userName + passWord);
+            if (obj["isLand"].ToString().Equals("True"))
+            {
+                MessageBox.Show("登陆成功");
+                //主窗口隐藏
+                Application.Current.Dispatcher.Invoke(new Action(() => { Application.Current.MainWindow.Hide(); }));
+                //打开好友界面
+                Application.Current.Dispatcher.Invoke(new Action(() => {
+                    FriendListWindow friedListWindow = new FriendListWindow();
+                    friedListWindow.Show(); }));
+                
 
-            //查询数据库
+            }
+            else
+            {
+                MessageBox.Show("登陆失败");
+                MClientViewModel mClientViewModel = MClientViewModel.CreateInstance();
+                mClientViewModel.UserPass = "";
+            }
 
-            
-            String str = "发送给客户端的测试数据";
-            ////这里是要获得字节数而不是元素数
-            //int packageLen = System.Text.Encoding.Default.GetByteCount(str) + 8;
-            //Console.WriteLine("包的大小为" + packageLen);
-            //byte[] bType = System.BitConverter.GetBytes(packageType);
-            //byte[] bLen = System.BitConverter.GetBytes(packageLen);
-            ////将数据放入发送buffer
-            //token.sendBuffer.AddRange(bType);
-            //token.sendBuffer.AddRange(bLen);
-            //token.sendBuffer.AddRange(System.Text.Encoding.Default.GetBytes(str));
-            ////接下来可以调用发送函数的回调函数了
-            ////下一次要发送多少数据
-            //token.sendPacketNum.Add(packageLen);
-            //Console.WriteLine("将信息保存进了sendBuffer");
-            mClient.SendMessage(1, str, e);
+
         }
 
         public static void RegisMessDeal(SocketAsyncEventArgs e)
@@ -151,11 +171,108 @@ namespace SocketAsyncEventArgsOfficeDemo
             String jsonStr = Encoding.Default.GetString(onePackage.ToArray());
             //得到用户名和密码
             JObject obj = JObject.Parse(jsonStr);
-            //MessageBox.Show(jsonStr);
-            //MessageBox.Show(obj["UserName"].ToString()+obj["PassWord"].ToString()+ obj["RealName"].ToString() +
-                                            //obj["Sex"].ToString() + obj["BirthDay"].ToString() + obj["Address"].ToString() +
-                                            //obj["Email"].ToString() + obj["PhoneNumber"].ToString() + obj["Remark"].ToString());
+            if (obj["isRegist"].ToString().Equals("True"))
+            {
+                MessageBox.Show("注册成功");
+                //关闭注册窗口
+                MClientViewModel mClientViewModel = MClientViewModel.CreateInstance();
+                //跨线程调用窗体组件的方法，使注册窗口关闭
+                mClientViewModel.registerWindow.Dispatcher.Invoke(new Action(() => { mClientViewModel.registerWindow.Close(); }));
 
+            }
+            else
+            {
+                MessageBox.Show("注册失败");
+                //清除掉密码
+                RegisterViewModel registerViewModel = RegisterViewModel.CreateInstance();
+                registerViewModel.PassWord = "";
+                registerViewModel.sPassWord = "";
+            }
+
+        }
+
+        public static void UserInfoDeal(SocketAsyncEventArgs e)
+        {
+            MClient mClient = MClient.CreateInstance();
+            AsyncUserToken token = (AsyncUserToken)e.UserToken;
+            //得到一个完整的包的数据，放入新list,第二个参数是数据长度，所以要减去8  
+            List<byte> onePackage = token.receiveBuffer.GetRange(8, token.packageLen - 8);
+            //将复制出来的数据从receiveBuffer旧list中删除
+            token.receiveBuffer.RemoveRange(0, token.packageLen);
+            //list要先转换成数组，再转换成字符串
+            String jsonStr = Encoding.Default.GetString(onePackage.ToArray());
+            //得到用户名和密码
+            JObject obj = JObject.Parse(jsonStr);
+
+            //如果传回来的用户信息是正确的
+            if (obj["isOk"].ToString().Equals("True"))
+            {
+                Console.WriteLine("保存自己的信息");
+                //先初始化数据库的静态变量(这里是用id合成数据库名)
+                SqliteConnect.SqliteInit(obj["id"].ToString());
+                //然后创建好友表和信息表(如果有，不会重复创建)
+                SqliteConnect.CreateTable();
+                //保存自己的最新信息
+                SqliteConnect.SaveUserInfo(obj["id"].ToString(), obj["UserName"].ToString(), obj["RealName"].ToString(), obj["Sex"].ToString(),
+                                            obj["BirthDay"].ToString(), obj["Address"].ToString(), obj["Email"].ToString(), obj["PhoneNumber"].ToString(),
+                                            obj["Remark"].ToString());
+            }
+            else
+            {
+                MessageBox.Show("用户信息返回失败");
+            }
+        }
+
+        public static void FriendInfoDeal(SocketAsyncEventArgs e)
+        {
+            MClient mClient = MClient.CreateInstance();
+            AsyncUserToken token = (AsyncUserToken)e.UserToken;
+            //得到一个完整的包的数据，放入新list,第二个参数是数据长度，所以要减去8  
+            List<byte> onePackage = token.receiveBuffer.GetRange(8, token.packageLen - 8);
+            //将复制出来的数据从receiveBuffer旧list中删除
+            token.receiveBuffer.RemoveRange(0, token.packageLen);
+            //list要先转换成数组，再转换成字符串
+            String jsonStr = Encoding.Default.GetString(onePackage.ToArray());
+            //得到用户名和密码
+            JArray jArray = JArray.Parse(jsonStr);
+
+            if (jArray[0]["isOk"].ToString().Equals("True"))
+            {
+                Console.WriteLine("保存好友信息");
+
+                foreach (var obj in jArray)
+                {
+                    SqliteConnect.SaveFriendInfo(obj["id"].ToString(), obj["Group"].ToString(), obj["UserName"].ToString(), obj["RealName"].ToString(), obj["Sex"].ToString(),
+                                            obj["BirthDay"].ToString(), obj["Address"].ToString(), obj["Email"].ToString(), obj["PhoneNumber"].ToString(),
+                                            obj["Remarks"].ToString());
+                }
+            }
+        }
+
+        public static void UserMessageDeal(SocketAsyncEventArgs e)
+        {
+            MClient mClient = MClient.CreateInstance();
+            AsyncUserToken token = (AsyncUserToken)e.UserToken;
+            //得到一个完整的包的数据，放入新list,第二个参数是数据长度，所以要减去8  
+            List<byte> onePackage = token.receiveBuffer.GetRange(8, token.packageLen - 8);
+            //将复制出来的数据从receiveBuffer旧list中删除
+            token.receiveBuffer.RemoveRange(0, token.packageLen);
+            //list要先转换成数组，再转换成字符串
+            String jsonStr = Encoding.Default.GetString(onePackage.ToArray());
+            //得到用户名和密码
+            JArray jArray = JArray.Parse(jsonStr);
+
+            if (jArray[0]["isOk"].ToString().Equals("True"))
+            {
+                Console.WriteLine("保存用户消息");
+
+                foreach (var obj in jArray)
+                {
+                    SqliteConnect.SaveFriendInfo(obj["id"].ToString(), obj["Group"].ToString(), obj["UserName"].ToString(), obj["RealName"].ToString(), obj["Sex"].ToString(),
+                                            obj["BirthDay"].ToString(), obj["Address"].ToString(), obj["Email"].ToString(), obj["PhoneNumber"].ToString(),
+                                            obj["Remark"].ToString());
+                }
+            }
         }
     }
 }
