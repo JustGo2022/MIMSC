@@ -84,6 +84,7 @@ namespace SocketAsyncEventArgsOfficeDemo
             connSocket.Connect(endPoint);
 
             receiveBuffer = new byte[1024];
+            //receiveBuffer = new byte[2048];
             sendBuffer = new byte[1024];
             
             //因为userToken是同一个,所以设置一个就行
@@ -146,7 +147,17 @@ namespace SocketAsyncEventArgsOfficeDemo
                 if (e.BytesTransferred > 0 && e.SocketError == SocketError.Success)
                 {
                     //使用MessageDeal类处理数据
-                    MessageDeal.ReceiveDeal(e);
+                    //TODO  在有大量数据包发送过来时，因为忙着处理数据库，所以有数据没有接收到
+                    //这里当数据大于8且不知道长度时，说明还有数据可以分析，那么就继续分析
+                    //如果剩下的包足够长，那么数据就会被处理，不够长，那么下一次剩余数据到达，必然会调用一次这个函数，也能处理    
+                    do
+                    {
+                        MessageDeal.ReceiveDeal(e);
+                    }
+                    while (token.receiveBuffer.Count > 8 && token.packageLen == 0);
+
+                    //Thread thread = new Thread(()=>MessageDeal.ReceiveDeal(e));
+                    //thread.Start();
 
                     //这里每一次接收到数据后，就会调用发送函数的回调函数
                     //那么后面服务端自己主动发送的时候，就需要自己主动调用了
@@ -158,6 +169,7 @@ namespace SocketAsyncEventArgsOfficeDemo
 
                     //接收完继续接收
                     Console.WriteLine("开始异步接收");
+                    token.isCopy = false;
                     bool willRaiseEvent = token.Socket.ReceiveAsync(e);
                     if (!willRaiseEvent)
                     {

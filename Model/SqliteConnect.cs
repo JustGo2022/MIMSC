@@ -223,7 +223,7 @@ namespace MISMC.Model
                 sQLiteConnection.Open();
                 SQLiteCommand qLiteCommand = sQLiteConnection.CreateCommand();
 
-                String tablename = friendid + "message";
+                String tablename ="F" + friendid + "message";
 
                 //这个好友的表存不存在
                 qLiteCommand.CommandText = "SELECT COUNT(*) FROM sqlite_master where type = 'table' and name = @table";
@@ -234,8 +234,8 @@ namespace MISMC.Model
                     Console.WriteLine(tablename + "表不存在，那么创建它");
                     qLiteCommand.CommandText = "create table " + tablename + "( friendid INT NOT NULL,"
                                                                               + " message varchar(255) NOT NULL, "
-                                                                              + " messsagedate datatime NOT NULL, "
-                                                                              + " type int(2) NOT NULL, "
+                                                                              + " messagedate datatime NOT NULL, "
+                                                                              + " type int(2) NOT NULL "
                                                                               + ")";
                     qLiteCommand.ExecuteNonQuery();
                 }
@@ -243,7 +243,7 @@ namespace MISMC.Model
                 //将信息插入
                 qLiteCommand.CommandText = "insert into " + tablename +" (friendid, message, messagedate, type) " +
                                            "values(@friendid, @message, @messagedate, @type)";
-                qLiteCommand.Parameters.AddWithValue("@riendid", friendid);
+                qLiteCommand.Parameters.AddWithValue("@friendid", friendid);
                 qLiteCommand.Parameters.AddWithValue("@message", message);
                 qLiteCommand.Parameters.AddWithValue("@messagedate", messagedate);
                 qLiteCommand.Parameters.AddWithValue("@type", type);

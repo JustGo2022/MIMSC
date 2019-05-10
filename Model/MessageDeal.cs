@@ -28,13 +28,17 @@ namespace SocketAsyncEventArgsOfficeDemo
         {
             Console.WriteLine("开始粘包处理");
             //粘包处理后，就可以分类处理
-            if (StickyDeal(e))
+            lock (e)
             {
-                Console.WriteLine("数据长度为 : " + ((AsyncUserToken)e.UserToken).packageLen);
-                //如果粘包处理成功，那么就可以开始分类处理
-                Console.WriteLine("开始分类处理");
-                ClassifyDeal(e);
+                if (StickyDeal(e))
+                {
+                    Console.WriteLine("数据长度为 : " + ((AsyncUserToken)e.UserToken).packageLen);
+                    //如果粘包处理成功，那么就可以开始分类处理
+                    Console.WriteLine("开始分类处理");
+                    ClassifyDeal(e);
+                }
             }
+            
         }
 
         //粘包处理
@@ -43,13 +47,20 @@ namespace SocketAsyncEventArgsOfficeDemo
             AsyncUserToken token = (AsyncUserToken)e.UserToken;
 
             //复制数据
-            byte[] data = new byte[e.BytesTransferred];
-            Array.Copy(e.Buffer, e.Offset, data, 0, e.BytesTransferred);
-            //将数据放入receiveBuffer
-            //receiveBuffer是list<byte>类型的
-            lock (token.receiveBuffer)
+            //e.Buffer中的数据要等到下一次调用异步接收时才会自动清除
+            //所以一次异步接收后，只用复制一次数据就行，这里要想办法规避掉第二次复制
+            if (!token.isCopy)
             {
-                token.receiveBuffer.AddRange(data);
+                byte[] data = new byte[e.BytesTransferred];
+                Array.Copy(e.Buffer, e.Offset, data, 0, e.BytesTransferred);
+                Console.WriteLine("data的大小 : " + data.Count());
+                //将数据放入receiveBuffer
+                //receiveBuffer是list<byte>类型的
+                lock (token.receiveBuffer)
+                {
+                    token.receiveBuffer.AddRange(data);
+                }
+                token.isCopy = true;
             }
 
             //粘包处理
@@ -199,6 +210,7 @@ namespace SocketAsyncEventArgsOfficeDemo
             List<byte> onePackage = token.receiveBuffer.GetRange(8, token.packageLen - 8);
             //将复制出来的数据从receiveBuffer旧list中删除
             token.receiveBuffer.RemoveRange(0, token.packageLen);
+            Console.WriteLine("清除receiveBuffer中的数据 , token.packageLen = " + token.packageLen);
             //list要先转换成数组，再转换成字符串
             String jsonStr = Encoding.Default.GetString(onePackage.ToArray());
             //得到用户名和密码
@@ -260,6 +272,7 @@ namespace SocketAsyncEventArgsOfficeDemo
             //list要先转换成数组，再转换成字符串
             String jsonStr = Encoding.Default.GetString(onePackage.ToArray());
             //得到用户名和密码
+            Console.WriteLine("jsonStr = " + jsonStr);
             JArray jArray = JArray.Parse(jsonStr);
 
             if (jArray[0]["isOk"].ToString().Equals("True"))
@@ -268,9 +281,7 @@ namespace SocketAsyncEventArgsOfficeDemo
 
                 foreach (var obj in jArray)
                 {
-                    SqliteConnect.SaveFriendInfo(obj["id"].ToString(), obj["Group"].ToString(), obj["UserName"].ToString(), obj["RealName"].ToString(), obj["Sex"].ToString(),
-                                            obj["BirthDay"].ToString(), obj["Address"].ToString(), obj["Email"].ToString(), obj["PhoneNumber"].ToString(),
-                                            obj["Remark"].ToString());
+                    SqliteConnect.SaveMessage(obj["FriendId"].ToString(), obj["Message"].ToString(), obj["MessageDate"].ToString());
                 }
             }
         }
