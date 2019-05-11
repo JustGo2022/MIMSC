@@ -151,12 +151,7 @@ namespace SocketAsyncEventArgsOfficeDemo
             if (obj["isLand"].ToString().Equals("True"))
             {
                 MessageBox.Show("登陆成功");
-                //主窗口隐藏
-                Application.Current.Dispatcher.Invoke(new Action(() => { Application.Current.MainWindow.Hide(); }));
-                //打开好友界面
-                Application.Current.Dispatcher.Invoke(new Action(() => {
-                    FriendListWindow friedListWindow = new FriendListWindow();
-                    friedListWindow.Show(); }));
+                
                 
 
             }
@@ -228,6 +223,14 @@ namespace SocketAsyncEventArgsOfficeDemo
                 SqliteConnect.SaveUserInfo(obj["id"].ToString(), obj["UserName"].ToString(), obj["RealName"].ToString(), obj["Sex"].ToString(),
                                             obj["BirthDay"].ToString(), obj["Address"].ToString(), obj["Email"].ToString(), obj["PhoneNumber"].ToString(),
                                             obj["Remark"].ToString());
+
+                //主窗口隐藏
+                Application.Current.Dispatcher.Invoke(new Action(() => { Application.Current.MainWindow.Hide(); }));
+                //打开好友界面
+                Application.Current.Dispatcher.Invoke(new Action(() => {
+                    FriendListWindow friedListWindow = new FriendListWindow();
+                    friedListWindow.Show();
+                }));
             }
             else
             {

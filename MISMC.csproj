@@ -78,8 +78,17 @@
     </ApplicationDefinition>
     <Compile Include="Model\SqliteConnect.cs" />
     <Compile Include="Model\UserInfo.cs" />
+    <Compile Include="ViewModel\ChatViewModel.cs" />
+    <Compile Include="ViewModel\FriendInfoViewModel.cs" />
+    <Compile Include="ViewModel\FriendListViewModel.cs" />
     <Compile Include="ViewModel\MClientViewModel.cs" />
     <Compile Include="ViewModel\RegisterViewModel.cs" />
+    <Compile Include="Windows\ChatWindow.xaml.cs">
+      <DependentUpon>ChatWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\FriendInfoWindow.xaml.cs">
+      <DependentUpon>FriendInfoWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Windows\FriendListWindow.xaml.cs">
       <DependentUpon>FriendListWindow.xaml</DependentUpon>
     </Compile>
@@ -98,6 +107,14 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Windows\ChatWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\FriendInfoWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Windows\FriendListWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

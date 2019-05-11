@@ -16,14 +16,19 @@ using System.Windows.Shapes;
 namespace MISMC.Windows
 {
     /// <summary>
-    /// FriendListWindow.xaml 的交互逻辑
+    /// ChatWindow.xaml 的交互逻辑
     /// </summary>
-    public partial class FriendListWindow : Window
+    public partial class ChatWindow : Window
     {
-        public FriendListWindow()
+        public ChatWindow()
         {
             InitializeComponent();
-            this.DataContext = new FriendListViewModel();
+            this.DataContext = new ChatViewModel();
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            this.Hide();
         }
     }
 }

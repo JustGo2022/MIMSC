@@ -4,9 +4,252 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MISMC.Windows"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:c1="clr-namespace:MyMVVM"
         mc:Ignorable="d"
         Title="FriendListWindow" Height="700" Width="400">
-    <Grid>
-        
+    <Window.Resources>
+        <Style x:Key="ExpanderDownHeaderStyle" TargetType="{x:Type ToggleButton}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ToggleButton}">
+                        <Border Padding="{TemplateBinding Padding}">
+                            <Grid x:Name="bk" Background="Transparent" Height="35" SnapsToDevicePixels="False">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="35"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Path x:Name="arrow" Data="M 3,3 L 8,8 L 3,13" 
+                                      HorizontalAlignment="Center" SnapsToDevicePixels="false" Stroke="DarkGray" 
+                                      StrokeThickness="2" VerticalAlignment="Center"/>
+                                <ContentPresenter Grid.Column="1" HorizontalAlignment="Left" Margin="4,0,0,0" RecognizesAccessKey="True" SnapsToDevicePixels="True" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="true">
+                                <Setter Property="Data" TargetName="arrow" Value="M 3,3  L 8,8  L 13,3"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="true">
+                                <Setter Property="Background" TargetName="bk" Value="#20333333"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="ExpanderStyle1" TargetType="{x:Type Expander}">
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Expander}">
+                        <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" CornerRadius="3" SnapsToDevicePixels="true">
+                            <DockPanel>
+                                <ToggleButton x:Name="HeaderSite" ContentTemplate="{TemplateBinding HeaderTemplate}" 
+                                              ContentTemplateSelector="{TemplateBinding HeaderTemplateSelector}" 
+                                              DockPanel.Dock="Top" 
+                                              Content="{TemplateBinding Header}" 
+                                              Foreground="{TemplateBinding Foreground}" 
+                                              FontWeight="{TemplateBinding FontWeight}" 
+                                              FontStyle="{TemplateBinding FontStyle}" 
+                                              FontStretch="{TemplateBinding FontStretch}" 
+                                              FontSize="{TemplateBinding FontSize}" 
+                                              FontFamily="{TemplateBinding FontFamily}" 
+                                              HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" 
+                                              IsChecked="{Binding IsExpanded, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" 
+                                              Margin="1" MinWidth="0" MinHeight="0" Padding="{TemplateBinding Padding}" 
+                                              Style="{StaticResource ExpanderDownHeaderStyle}" 
+                                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                                <ContentPresenter x:Name="ExpandSite" DockPanel.Dock="Bottom" Focusable="false" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" Visibility="Collapsed" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                            </DockPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsExpanded" Value="true">
+                                <Setter Property="Visibility" TargetName="ExpandSite" Value="Visible"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style TargetType="{x:Type ScrollViewer}">
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="CanContentScroll" Value="True"></Setter>
+            <Setter Property="HorizontalScrollBarVisibility" Value="Hidden"/>
+
+            <Style.Resources>
+                <SolidColorBrush x:Key="NormalBorderBrush" Color="#FFFF0000" />
+                <SolidColorBrush x:Key="HorizontalNormalBrush" Color="#FFFF0000" />
+                <SolidColorBrush x:Key="HorizontalNormalBorderBrush" Color="#FFFF0000" />
+                <SolidColorBrush x:Key="DisabledForegroundBrush" Color="#FFFF0000" />
+                <SolidColorBrush x:Key="NormalBrush" Color="Transparent" />
+                <!--滚动条样式-->
+                <Style x:Key="ScrollBarThumb" TargetType="{x:Type Thumb}">
+                    <Setter Property="SnapsToDevicePixels" Value="True"/>
+                    <Setter Property="OverridesDefaultStyle" Value="true"/>
+                    <Setter Property="IsTabStop" Value="false"/>
+                    <Setter Property="Width" Value="8"/>
+                    <Setter Property="Focusable" Value="false"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="{x:Type Thumb}">
+                                <!-- 滑块正常颜色  FF428BCA  FF00FFFF -->
+                                <Border x:Name="border"  Background="#FF428BCA" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="0" />
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <!-- 滑块鼠标移上去颜色80FFFFFF  -->
+                                        <Setter Property="Background" TargetName="border" Value="#FF1F7AC9"></Setter>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+
+
+                <ControlTemplate x:Key="VerticalScrollBar" TargetType="{x:Type ScrollBar}">
+                    <Grid >
+                        <!-- 滑块背景颜色-->
+                        <Border CornerRadius="2"  Background="Transparent"  BorderThickness="0" BorderBrush="#D6D4D4" />
+                        <Track Name="PART_Track" IsDirectionReversed="true">
+                            <Track.Thumb>
+                                <Thumb Style="{StaticResource ScrollBarThumb}" 
+                                   Margin="1,0,1,0" Background="{StaticResource HorizontalNormalBrush}" 
+                                   BorderBrush="{StaticResource HorizontalNormalBorderBrush}" />
+                            </Track.Thumb>
+                        </Track>
+
+                    </Grid>
+                </ControlTemplate>
+
+                <Style x:Key="HScrollBarThumb" TargetType="{x:Type Thumb}">
+                    <Setter Property="SnapsToDevicePixels" Value="True"/>
+                    <Setter Property="OverridesDefaultStyle" Value="true"/>
+                    <Setter Property="IsTabStop" Value="false"/>
+                    <Setter Property="Height" Value="9"/>
+                    <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                    <Setter Property="Focusable" Value="false"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="{x:Type Thumb}">
+                                <!-- 滑块正常颜色-->
+                                <Border  x:Name="border" CornerRadius="0" Background="#FF428BCA" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="0" />
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <!-- 滑块鼠标移上去颜色-->
+                                        <Setter Property="Background" TargetName="border" Value="#FF1F7AC9"></Setter>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+
+                <ControlTemplate x:Key="HorizontalScrollBar" TargetType="{x:Type ScrollBar}">
+                    <Grid >
+                        <!-- 滑块背景颜色-->
+                        <Border  Grid.ColumnSpan="3"  CornerRadius="2" Background="Transparent"  BorderThickness="0" BorderBrush="#D6D4D4" />
+                        <Track Name="PART_Track" IsDirectionReversed="False">
+                            <Track.Thumb>
+                                <Thumb Style="{StaticResource HScrollBarThumb}" Margin="0,1,0,1" Background="{StaticResource NormalBrush}" BorderBrush="{StaticResource NormalBorderBrush}" />
+                            </Track.Thumb>
+                        </Track>
+                    </Grid>
+                </ControlTemplate>
+
+                <!--滚动条整体样式-->
+                <Style x:Key="{x:Type ScrollBar}" TargetType="{x:Type ScrollBar}">
+                    <Setter Property="SnapsToDevicePixels" Value="True"/>
+                    <Setter Property="Background" Value="Transparent"/>
+                    <Setter Property="OverridesDefaultStyle" Value="true"/>
+                    <Style.Triggers>
+                        <Trigger Property="Orientation" Value="Horizontal">
+                            <Setter Property="Width" Value="Auto"/>
+                            <Setter Property="Height" Value="8" />
+                            <Setter Property="Template" Value="{StaticResource HorizontalScrollBar}" />
+                        </Trigger>
+                        <Trigger Property="Orientation" Value="Vertical">
+                            <Setter Property="Width" Value="8"/>
+                            <Setter Property="Height" Value="Auto" />
+                            <Setter Property="Template" Value="{StaticResource VerticalScrollBar}" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Style.Resources>
+        </Style>
+    </Window.Resources>
+
+    <!--上面是Recources，下面是具体布局-->
+        <Grid>
+        <ScrollViewer VerticalScrollBarVisibility="Visible">
+            <ItemsControl ItemsSource="{Binding friendGroups}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel></StackPanel>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Expander Header="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                                  Style="{StaticResource ExpanderStyle1}"
+                                  HorizontalAlignment="Stretch"  VerticalAlignment="Top" >
+                            <Grid Background="#00000000">
+                                <ItemsControl ItemsSource="{Binding Friends}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel></StackPanel>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+
+                                            <Grid x:Name="bk" Height="60" HorizontalAlignment="Stretch" Margin="5,5,5,5">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="68"/>
+                                                    <ColumnDefinition Width="80*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition></RowDefinition>
+                                                    <RowDefinition></RowDefinition>
+                                                </Grid.RowDefinitions>
+                                                <Rectangle Fill="Chocolate" HorizontalAlignment="Center" 
+                                                           VerticalAlignment="Center" Width="40" Height="40" Grid.Column="0"></Rectangle>
+                                                <Label Content="{Binding Name}" Margin="0,5,0,0" Grid.Column="1" Grid.Row="0">
+                                                    <i:Interaction.Triggers>
+                                                        <i:EventTrigger EventName="MouseDoubleClick">
+                                                            <c1:MyEventCommand Command="{Binding  BtOpenChat}"/>
+                                                        </i:EventTrigger>
+                                                    </i:Interaction.Triggers>
+                                                </Label>
+                                                <Label Content="Remarks : " Grid.Column="0" Grid.Row="1"></Label>
+                                                <TextBlock Text="{Binding Remarks}" Grid.Row="1" Grid.Column="1">
+                                                </TextBlock>
+                                                <i:Interaction.Triggers>
+                                                    <i:EventTrigger EventName="MouseRightButtonUp">
+                                                        <c1:MyEventCommand Command="{Binding  BtOpenChoose}"/>
+                                                    </i:EventTrigger>
+                                                </i:Interaction.Triggers>
+                                            </Grid>
+                                            <DataTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="true">
+                                                    <Setter Property="Background" TargetName="bk" Value="#15333333"/>
+                                                </Trigger>
+                                            </DataTemplate.Triggers>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </Grid>
+                        </Expander>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
     </Grid>
 </Window>
