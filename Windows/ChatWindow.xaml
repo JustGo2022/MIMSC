@@ -4,9 +4,64 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MISMC.Windows"
+        xmlns:c1="clr-namespace:MyMVVM"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         mc:Ignorable="d"
-        Title="{Binding UserName}" Height="450" Width="800" Closing="Window_Closing" >
-    <Grid>
-        
+        Title="{Binding UserName}" Height="600" Width="600" Closing="Window_Closing" Initialized="Window_Initialized" >
+
+    <Grid Background="#00000000">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="400" ></RowDefinition>
+            <RowDefinition Height="180"></RowDefinition>
+        </Grid.RowDefinitions>
+        <ScrollViewer Name="scroll" VerticalScrollBarVisibility="Visible" Grid.Row="0" SizeChanged="scroll_SizeChanged"  >
+            <ItemsControl x:Name="itcl" ItemsSource="{Binding MessageMixGroup}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel></StackPanel>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel   Margin="10" Width="400" HorizontalAlignment="{Binding Type}">
+                            <Grid x:Name="spl"  Background="AliceBlue" HorizontalAlignment="{Binding Type}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition></ColumnDefinition>
+                                    <ColumnDefinition></ColumnDefinition>
+                                </Grid.ColumnDefinitions>
+                                <Label x:Name="friendname" Grid.Column="0" Content="{Binding FriendId}" Background="OrangeRed">
+                                </Label>
+                                <Label x:Name="messagedate" Grid.Column="1" Content="{Binding MessageDate}" Background="Orchid">
+                                </Label>
+                            </Grid>
+                            <StackPanel Background="YellowGreen">
+                                <TextBlock TextWrapping = "Wrap" Text="{Binding Message}">
+                                </TextBlock>
+                            </StackPanel>
+                        </StackPanel>
+                        <DataTemplate.Triggers>
+                            <DataTrigger Binding="{Binding Type}" Value="Right">
+                                <Setter TargetName="friendname" Property="Grid.Column" Value="1"></Setter>
+                                <Setter TargetName="messagedate" Property="Grid.Column" Value="0"></Setter>
+                            </DataTrigger>
+                        </DataTemplate.Triggers>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+        <Grid  Grid.Row="1" Margin="20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="400"></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <TextBox Grid.Column="0" TextWrapping="Wrap" Text="Mess"></TextBox>
+            <Button Grid.Column="1" Content="发送" Margin="25">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="Click">
+                        <c1:MyEventCommand Command="{Binding  BtSendMessage}"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </Button>
+        </Grid>
     </Grid>
 </Window>

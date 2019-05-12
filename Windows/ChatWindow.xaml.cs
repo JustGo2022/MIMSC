@@ -28,7 +28,17 @@ namespace MISMC.Windows
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            this.Hide();
+            
+        }
+
+        private void Window_Initialized(object sender, EventArgs e)
+        {
+            this.scroll.ScrollToEnd();
+        }
+
+        private void scroll_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            this.scroll.ScrollToEnd();
         }
     }
 }

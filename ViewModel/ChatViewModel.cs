@@ -1,9 +1,13 @@
-﻿using MyMVVM;
+﻿using MISMC.Model;
+using MyMVVM;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace MISMC.ViewModel
 {
@@ -11,7 +15,27 @@ namespace MISMC.ViewModel
     {
         public ChatViewModel()
         {
+            MessageMixGroup = new ObservableCollection<MessageMix>();
+            //启动一个线程，这个线程负责更新聊天消息
+            Thread thread = new Thread(MessageUpdata);
+            thread.Start();
+        }
 
+        public void MessageUpdata()
+        {
+            while (true)
+            {
+
+                Application.Current.Dispatcher.Invoke(
+                new Action(() =>
+                {
+                    //数据库消息更新函数
+                    SqliteConnect.QueryMessage(this.Id, ref _messageMixGroup);
+                })
+                );
+
+                Thread.Sleep(5000);
+            }
         }
 
         public void  ChatSet(String Id, String UserName, String RealName, String Sex, String BirthDay, String Address, String Email, String PhoneNumber, String Remarks)
@@ -153,5 +177,65 @@ namespace MISMC.ViewModel
                 }
             }
         }
+
+        //绑定聊天框的消息
+        private String mess;
+        public String Mess
+        {
+            get { return mess; }
+            set
+            {
+                if (mess != value)
+                {
+                    mess = value;
+                    RaisePropertyChanged("Mess");
+                }
+            }
+        }
+
+        private ObservableCollection<MessageMix> _messageMixGroup;
+        public ObservableCollection<MessageMix> MessageMixGroup
+        {
+            get
+            {
+                return _messageMixGroup;
+            }
+            set
+            {
+                _messageMixGroup = value;
+                RaisePropertyChanged("MessageMixGroup");
+            }
+        }
+
+        //消息发送函数
+        private MyCommand btSendMessage;
+        public MyCommand BtSendMessage
+        {
+            get
+            {
+                if (btSendMessage == null)
+                    btSendMessage = new MyCommand(
+                        new Action<object>(
+                            o =>
+                            {
+                                //将消息发送给服务端S
+
+                                //将消息保存到本地数据库
+
+                                //调用读取，或者直接修改消息List
+                               
+                            }));
+                return btSendMessage;
+            }
+        }
+    }
+
+    class MessageMix
+    {
+        public String FriendId { get; set; }
+        public String FriendName{ get; set; }
+        public String Message { get; set; }
+        public String MessageDate { get; set; }
+        public String Type { get; set; }
     }
 }

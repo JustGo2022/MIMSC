@@ -284,7 +284,6 @@ namespace MISMC.Model
 
                 //循环改变friendcollection的值
                 //保存上一个分组
-                String lastGroup = "";
                 FriendGroup friendgroup = null;
                 FriendEntity friendEntity;
                 while (sqlitreader.Read())
@@ -310,6 +309,60 @@ namespace MISMC.Model
                     friendEntity.Email = sqlitreader[7].ToString();
                     friendEntity.PhoneNumber = sqlitreader[8].ToString();
                     friendEntity.Remarks = sqlitreader[9].ToString();
+                }
+                sqlitreader.Close();
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("SaveFriendInfo Error : " + ex);
+            }
+            sQLiteConnection.Close();
+            Console.WriteLine("好友信息查询结束");
+        }
+
+        public static void QueryMessage(String Id, ref ObservableCollection<MessageMix> messageMixGroup)
+        {
+            Console.WriteLine(Id + "聊天消息查询开始");
+            //该好友对应的消息表的表名字
+            String table = "F" + Id + "message";
+            //先获得一个数据库连接
+            SQLiteConnection sQLiteConnection = SqliteConnect.GetSqliteConnect();
+            sQLiteConnection.Open();
+            try
+            {
+                SQLiteCommand qLiteCommand = sQLiteConnection.CreateCommand();
+                //这里要先看看数据库有没有变化
+                //目前可行方法 ①:查询数据库消息总数，如果消息数没有改变，那么就直接跳出，不作变化
+                //             ②:数据库有没有可行的变化与否的方法
+                //TODO 添加倒数条数指示，用于向前向后翻页。添加总数指示，用于数据库变化方法①
+
+                //先分组，再排序
+                qLiteCommand.CommandText = "select * from " +table+ " order by messagedate asc limit 30";
+                //获得查询结果集
+                SQLiteDataReader sqlitreader = qLiteCommand.ExecuteReader();
+
+                MessageMix message = null;
+                while (sqlitreader.Read())
+                {
+                    message = new MessageMix();
+                    messageMixGroup.Add(message);
+                    //获得好友信息
+                    message.FriendId = sqlitreader[0].ToString();
+                    message.Message = sqlitreader[1].ToString();
+                    message.MessageDate = sqlitreader[2].ToString();
+                    if (int.Parse(sqlitreader[3].ToString()) == 0)
+                    {
+                        //好友发过来的消息
+                        message.Type = "Left";
+                    }
+                    else
+                    {
+                        //自己发给好友的消息
+                        message.Type = "Right";
+                    }
+
+
                 }
                 sqlitreader.Close();
 
