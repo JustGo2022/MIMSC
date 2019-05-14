@@ -21,12 +21,28 @@ namespace MISMC.ViewModel
     {
         public FriendListViewModel()
         {
+            //查询数据库，拿到当前用户的所有信息，并保存在这个类里面
+            SqliteConnect.QueryUserInfo(out FriendListViewModel.id, out FriendListViewModel.username, out FriendListViewModel.realname, out FriendListViewModel.sex, out FriendListViewModel.birthday, out FriendListViewModel.address, out FriendListViewModel.email, out FriendListViewModel.phonenumber, out FriendListViewModel.remark);
             //分组列表
             friendGroups = new ObservableCollection<FriendGroup>();
             //启动一个线程，这个函数负责对好友列表界面进行维护
-            Thread thread = new Thread(FriendListUpdata);
-            thread.Start();
+            scanThread = new Thread(FriendListUpdata);
+            scanThread.Start();       
         }
+
+        //RegisterViewModel的单例函数
+        private static FriendListViewModel friendListViewModel = null;
+        public static FriendListViewModel CreateInstance()
+        {
+            if (friendListViewModel == null)
+            {
+                friendListViewModel = new FriendListViewModel();
+            }
+            return friendListViewModel;
+        }
+
+        //扫描线程
+        Thread scanThread;
 
         public void FriendListUpdata()
         {
@@ -66,8 +82,185 @@ namespace MISMC.ViewModel
         }
 
 
-        
+        public static String id;
+        public String Id
+        {
+            get { return id; }
+            set
+            {
+                if (id != value)
+                {
+                    id = value;
+                    RaisePropertyChanged("Id");
+                }
+            }
+        }
 
+        public static String username;
+        public String UserName
+        {
+            get { return username; }
+            set
+            {
+                if (username != value)
+                {
+                    username = value;
+                    RaisePropertyChanged("UserName");
+                }
+            }
+        }
+
+
+        public static String realname;
+        public String RealName
+        {
+            get { return realname; }
+            set
+            {
+                if (realname != value)
+                {
+                    realname = value;
+                    RaisePropertyChanged("Realname");
+                }
+            }
+        }
+
+        public static String sex;
+        public String Sex
+        {
+            get { return sex; }
+            set
+            {
+                if (sex != value)
+                {
+                    sex = value;
+                    RaisePropertyChanged("Sex");
+                }
+            }
+        }
+
+        public static String birthday;
+        public String BirthDay
+        {
+            get { return birthday; }
+            set
+            {
+                if (birthday != value)
+                {
+                    birthday = value;
+                    RaisePropertyChanged("BirthDay");
+                }
+            }
+        }
+
+        public static String address;
+        public String Address
+        {
+            get { return address; }
+            set
+            {
+                if (address != value)
+                {
+                    address = value;
+                    RaisePropertyChanged("Address");
+                }
+            }
+        }
+
+        public static String email;
+        public String Email
+        {
+            get { return email; }
+            set
+            {
+                if (email != value)
+                {
+                    email = value;
+                    RaisePropertyChanged("Email");
+                }
+            }
+        }
+
+        public static String phonenumber;
+        public String PhoneNumber
+        {
+            get { return phonenumber; }
+            set
+            {
+                if (phonenumber != value)
+                {
+                    phonenumber = value;
+                    RaisePropertyChanged("PhoneNumber");
+                }
+            }
+        }
+
+        public static String remark;
+        public String Remark
+        {
+            get { return remark; }
+            set
+            {
+                if (remark != value)
+                {
+                    remark = value;
+                    RaisePropertyChanged("Remark");
+                }
+            }
+        }
+
+        //看目标用户是否在此用户的好友列表中
+        public bool isFriendList(String Id)
+        {
+            foreach (var group in friendGroups)
+            {
+                foreach (var friend in group.Friends)
+                {
+                    if (friend.Id.Equals(Id))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        //窗口Close事件
+        private MyCommand friendListWindowClose;
+        public MyCommand FriendListWindowClose
+        {
+            get
+            {
+                if (friendListWindowClose == null)
+                    friendListWindowClose = new MyCommand(
+                        new Action<object>(
+                            o =>
+                            {
+                                //退出扫描线程
+                                this.scanThread.Abort();
+                                //直接干掉整个程序
+                                System.Environment.Exit(0);
+                            }));
+                return friendListWindowClose;
+            }
+        }
+
+        private MyCommand btAddFriend;
+        public MyCommand BtAddFriend
+        {
+            get
+            {
+                if (btAddFriend == null)
+                    btAddFriend = new MyCommand(
+                        new Action<object>(
+                            o =>
+                            {
+                                AddFriendWindow addFriendWindow = new AddFriendWindow();
+                                addFriendWindow.Show();
+                            }));
+                return btAddFriend;
+            }
+        }
     }
 
 
@@ -168,7 +361,7 @@ namespace MISMC.ViewModel
             {
                 chatWindow = new ChatWindow();
                 ChatViewModel chatViewModel = (ChatViewModel)chatWindow.DataContext;
-                chatViewModel.ChatSet(this.Id, this.Name, this.RealName, this.Sex, this.BirthDay, this.Address, this.Email, this.PhoneNumber, this.Remarks);
+                chatViewModel.ChatSet(FriendListViewModel.username, this.Id, this.Name, this.RealName, this.Sex, this.BirthDay, this.Address, this.Email, this.PhoneNumber, this.Remarks);
                 chatWindow.Show();
             }     
         }
@@ -179,7 +372,7 @@ namespace MISMC.ViewModel
             {
                 chatWindow = new ChatWindow();
                 ChatViewModel chatViewModel = (ChatViewModel)chatWindow.DataContext;
-                chatViewModel.ChatSet(this.Id, this.Name, this.RealName, this.Sex, this.BirthDay, this.Address, this.Email, this.PhoneNumber, this.Remarks);
+                chatViewModel.ChatSet(FriendListViewModel.username, this.Id, this.Name, this.RealName, this.Sex, this.BirthDay, this.Address, this.Email, this.PhoneNumber, this.Remarks);
                 chatWindow.Show();
             }
         }
@@ -217,6 +410,8 @@ namespace MISMC.ViewModel
                 return btOpenChat;
             }
         }
+
+        
     }
 
 

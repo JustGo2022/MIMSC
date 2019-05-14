@@ -11,7 +11,7 @@ namespace MISMC.ViewModel
 {
     class RegisterViewModel : NotifyObject
     {
-        //用来操作mClientViewModel中mServer的注册信息发送函数
+        //用来操作mClientViewModel中mClient的注册信息发送函数
         public MClientViewModel mClientViewModel;
 
         //RegisterViewModel的构造函数

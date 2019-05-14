@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace MISMC.Model
 {
+    //这个类是用来保存当前使用用户的信息的，因为时单例模式，所以在哪里都可以拿到这个类的唯一副本
     public class UserInfo
     {
         public String UserName { get; set; }
@@ -21,5 +22,15 @@ namespace MISMC.Model
         public String IpAddress { get; set; }
         public String Port { get; set; }
         public String Group { get; set; }
+
+        private static UserInfo userInfo = null;
+        public static UserInfo CreateInstance()
+        {
+            if (userInfo == null)
+            {
+                userInfo = new UserInfo();
+            }
+            return userInfo;
+        }
     }
 }

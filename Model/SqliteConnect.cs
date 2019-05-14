@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace MISMC.Model
 {
@@ -156,6 +157,7 @@ namespace MISMC.Model
             sQLiteConnection.Close();
         }
 
+        //保存好友的详细信息
         public static void SaveFriendInfo(String id, String friendgroup, String username, String realname, String sex, String birthday, String address, String email, String phonenumber, String reamarks)
         {
             //先获得一个数据库连接
@@ -263,6 +265,49 @@ namespace MISMC.Model
             sQLiteConnection.Close();
         }
 
+        //查询自己的详细信息
+        public static void  QueryUserInfo(out String id, out String username, out String realname, out String sex, out String birthday, out String address, out String email, out String phonenumber, out String remarks)
+        {
+            //先获得一个数据库连接
+            SQLiteConnection sQLiteConnection = SqliteConnect.GetSqliteConnect();
+            sQLiteConnection.Open();
+            try
+            {
+                SQLiteCommand qLiteCommand = sQLiteConnection.CreateCommand();
+                qLiteCommand.CommandText = "select * from userinformation";
+                //获得查询结果
+                SQLiteDataReader sqlitreader = qLiteCommand.ExecuteReader();
+                sqlitreader.Read();
+
+                id = sqlitreader[0].ToString();
+                username = sqlitreader[1].ToString();
+                realname = sqlitreader[2].ToString();
+                sex = sqlitreader[3].ToString();
+                birthday = sqlitreader[4].ToString();
+                address = sqlitreader[5].ToString();
+                email = sqlitreader[6].ToString();
+                phonenumber = sqlitreader[7].ToString();
+                remarks = sqlitreader[8].ToString();
+
+                sqlitreader.Close();
+
+            }
+            catch (Exception ex)
+            {
+                id = "ERROR";
+                username = "ERROR";
+                realname = "ERROR";
+                sex = "ERROR";
+                birthday = "ERROR";
+                address = "ERROR";
+                email = "ERROR";
+                phonenumber = "ERROR";
+                remarks = "ERROR";
+                Console.WriteLine("SaveFriendInfo Error : " + ex);
+            }
+            sQLiteConnection.Close();
+        }
+
         //查询所有好友的详细信息
         public static void QueryFriendInfo(ref ObservableCollection<FriendGroup> friendCollection)
         {
@@ -321,7 +366,10 @@ namespace MISMC.Model
             Console.WriteLine("好友信息查询结束");
         }
 
-        public static void QueryMessage(String Id, ref ObservableCollection<MessageMix> messageMixGroup)
+
+
+        //查询对应好友的聊天信息
+        public static void QueryMessage(String Username, String FriendName, String Id, ref ObservableCollection<MessageMix> messageMixGroup)
         {
             Console.WriteLine(Id + "聊天消息查询开始");
             //该好友对应的消息表的表名字
@@ -337,20 +385,34 @@ namespace MISMC.Model
                 //             ②:数据库有没有可行的变化与否的方法
                 //TODO 添加倒数条数指示，用于向前向后翻页。添加总数指示，用于数据库变化方法①
 
-                //先分组，再排序
-                qLiteCommand.CommandText = "select * from " +table+ " order by messagedate asc limit 30";
+                //如果记录条数为0，说明是第一次读数据，所以使用这个语句
+                if (messageMixGroup.Count == 0)
+                {
+                    qLiteCommand.CommandText = "select * from " + table + " order by messagedate desc limit 30";                 
+                }
+                else
+                {
+                    //如果不是第一次读取数据，那么在数据表中寻找日期大于最后一条已装入信息的记录
+                    qLiteCommand.CommandText = "select * from " + table + "  where messagedate > @messagedate order by messagedate desc";
+                    qLiteCommand.Parameters.AddWithValue("@messagedate", messageMixGroup.Last().MessageDate);
+                }
                 //获得查询结果集
                 SQLiteDataReader sqlitreader = qLiteCommand.ExecuteReader();
+
+                int messcount = messageMixGroup.Count;
 
                 MessageMix message = null;
                 while (sqlitreader.Read())
                 {
                     message = new MessageMix();
-                    messageMixGroup.Add(message);
+                    //将数据插入到最前面，因为在查询是是按日期从大到小排的，而日期小的应该在前面
+                    messageMixGroup.Insert(messcount, message);
                     //获得好友信息
                     message.FriendId = sqlitreader[0].ToString();
                     message.Message = sqlitreader[1].ToString();
                     message.MessageDate = sqlitreader[2].ToString();
+                    message.FriendName = FriendName;
+                    message.UserName = Username;
                     if (int.Parse(sqlitreader[3].ToString()) == 0)
                     {
                         //好友发过来的消息
@@ -365,7 +427,6 @@ namespace MISMC.Model
 
                 }
                 sqlitreader.Close();
-
             }
             catch (Exception ex)
             {
@@ -373,6 +434,35 @@ namespace MISMC.Model
             }
             sQLiteConnection.Close();
             Console.WriteLine("好友信息查询结束");
+        }
+
+        //保存聊天信息
+        public static void SaveChat(String Id, String message, String messageDate)
+        {
+            Console.WriteLine(Id + "插入聊天消息");
+            //该好友对应的消息表的表名字
+            String table = "F" + Id + "message";
+            //先获得一个数据库连接
+            SQLiteConnection sQLiteConnection = SqliteConnect.GetSqliteConnect();
+            sQLiteConnection.Open();
+            try
+            {
+                SQLiteCommand command = sQLiteConnection.CreateCommand();
+
+                command.CommandText = "insert into " + table + "(friendid, message, messagedate, type) values(@friendid, @message, @messagedate, @type)";
+                command.Parameters.AddWithValue("@friendid", Id);
+                command.Parameters.AddWithValue("@message", message);
+                command.Parameters.AddWithValue("@messagedate", messageDate);
+                //因为是自己发给别人的信息，所有这里的type=1
+                command.Parameters.AddWithValue("@type", "1");
+                command.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("SaveFriendInfo Error : " + ex);
+            }
+            sQLiteConnection.Close();
+
         }
     }
 }

@@ -8,6 +8,13 @@
         xmlns:c1="clr-namespace:MyMVVM"
         mc:Ignorable="d"
         Title="FriendListWindow" Height="700" Width="400">
+
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Closed">
+            <c1:MyEventCommand Command="{Binding  FriendListWindowClose}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+
     <Window.Resources>
         <Style x:Key="ExpanderDownHeaderStyle" TargetType="{x:Type ToggleButton}">
             <Setter Property="Template">
@@ -188,7 +195,24 @@
 
     <!--上面是Recources，下面是具体布局-->
         <Grid>
-        <ScrollViewer VerticalScrollBarVisibility="Visible">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0">
+            <Label Content="{Binding UserName}"></Label>
+        </Grid>
+        <ToolBar Grid.Row="1">
+            <Button Content="添加好友">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="Click">
+                        <c1:MyEventCommand Command="{Binding  BtAddFriend}"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </Button>
+        </ToolBar>
+        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Visible">
             <ItemsControl ItemsSource="{Binding friendGroups}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>

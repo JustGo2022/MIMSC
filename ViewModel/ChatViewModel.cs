@@ -1,5 +1,7 @@
 ﻿using MISMC.Model;
 using MyMVVM;
+using Newtonsoft.Json.Linq;
+using SocketAsyncEventArgsOfficeDemo;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -16,9 +18,10 @@ namespace MISMC.ViewModel
         public ChatViewModel()
         {
             MessageMixGroup = new ObservableCollection<MessageMix>();
+            this.DbMessCount = 0;
             //启动一个线程，这个线程负责更新聊天消息
-            Thread thread = new Thread(MessageUpdata);
-            thread.Start();
+            scanThread = new Thread(MessageUpdata);
+            scanThread.Start();
         }
 
         public void MessageUpdata()
@@ -29,18 +32,21 @@ namespace MISMC.ViewModel
                 Application.Current.Dispatcher.Invoke(
                 new Action(() =>
                 {
-                    //数据库消息更新函数
-                    SqliteConnect.QueryMessage(this.Id, ref _messageMixGroup);
+                    //从数据库中更新聊天消息
+                    SqliteConnect.QueryMessage(this.NowName, this.UserName, this.FriendId, ref _messageMixGroup);
                 })
                 );
 
-                Thread.Sleep(5000);
+                Thread.Sleep(2000);
             }
         }
 
-        public void  ChatSet(String Id, String UserName, String RealName, String Sex, String BirthDay, String Address, String Email, String PhoneNumber, String Remarks)
+        public void  ChatSet(String nowname, String friendId, String UserName, String RealName, String Sex, String BirthDay, String Address, String Email, String PhoneNumber, String Remarks)
         {
-            this.Id = Id;
+            //当前用户名
+            this.NowName = nowname;
+            this.FriendId = friendId;
+            //好友的名称
             this.UserName = UserName;
             this.RealName = RealName;
             this.Sex = Sex;
@@ -51,16 +57,36 @@ namespace MISMC.ViewModel
             this.Remark = Remarks;
         }
 
-        private String id;
-        public String Id
+        //记录该好友消息表的消息总数，以此来确定是否有新的聊天消息
+        public int DbMessCount;
+
+        //扫描线程
+        Thread scanThread;
+
+        private String nowname;
+        public String NowName
         {
-            get { return id; }
+            get { return nowname; }
             set
             {
-                if (id != value)
+                if (nowname != value)
                 {
-                    id = value;
-                    RaisePropertyChanged("Id");
+                    nowname = value;
+                    RaisePropertyChanged("NowName");
+                }
+            }
+        }
+
+        private String friendid;
+        public String FriendId
+        {
+            get { return friendid; }
+            set
+            {
+                if (friendid != value)
+                {
+                    friendid = value;
+                    RaisePropertyChanged("FriendId");
                 }
             }
         }
@@ -218,22 +244,59 @@ namespace MISMC.ViewModel
                         new Action<object>(
                             o =>
                             {
-                                //将消息发送给服务端S
-
+                                //将消息发送给服务端
+                                JObject obj = new JObject();
+                                obj["Message"] = this.Mess;
+                                String nowTime = DateTime.Now.ToString();
+                                obj["MessageDate"] = nowTime;
+                                obj["ReceiveId"] = FriendId;
+                                String str = obj.ToString();
+                                MClient mClient = MClient.CreateInstance();
+                                mClient.SendChat(str);
                                 //将消息保存到本地数据库
-
-                                //调用读取，或者直接修改消息List
-                               
+                                SqliteConnect.SaveChat(FriendId, this.Mess, nowTime);
+                                //直接修改消息List
+                                //这里直接追加到最后面是没有问题的
+                                MessageMix message = new MessageMix();
+                                MessageMixGroup.Add(message);
+                                message.FriendId = FriendId;
+                                message.Message = this.Mess;
+                                message.MessageDate = nowTime;
+                                message.FriendName = UserName;
+                                message.UserName = NowName;
+                                //因为是自己发给对方，所以消息要放到右边
+                                message.Type = "Right";
+                                //消息清空
+                                this.Mess = "";
                             }));
                 return btSendMessage;
             }
         }
+
+        private MyCommand chatWindowClose;
+        public MyCommand ChatWindowClose
+        {
+            get
+            {
+                if (chatWindowClose == null)
+                    chatWindowClose = new MyCommand(
+                        new Action<object>(
+                            o =>
+                            {
+                                //退出扫描线程
+                                this.scanThread.Abort();
+                            }));
+                return chatWindowClose;
+            }
+        }
+
     }
 
     class MessageMix
     {
         public String FriendId { get; set; }
         public String FriendName{ get; set; }
+        public String UserName { get; set; }
         public String Message { get; set; }
         public String MessageDate { get; set; }
         public String Type { get; set; }

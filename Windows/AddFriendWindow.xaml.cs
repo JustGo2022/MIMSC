@@ -16,14 +16,14 @@ using System.Windows.Shapes;
 namespace MISMC.Windows
 {
     /// <summary>
-    /// FriendListWindow.xaml 的交互逻辑
+    /// AddFriendWindow.xaml 的交互逻辑
     /// </summary>
-    public partial class FriendListWindow : Window
+    public partial class AddFriendWindow : Window
     {
-        public FriendListWindow()
+        public AddFriendWindow()
         {
             InitializeComponent();
-            this.DataContext = FriendListViewModel.CreateInstance();
+            this.DataContext = AddFriendViewModel.CreateInstance();
         }
     }
 }

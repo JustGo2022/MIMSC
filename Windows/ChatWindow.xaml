@@ -9,6 +9,12 @@
         mc:Ignorable="d"
         Title="{Binding UserName}" Height="600" Width="600" Closing="Window_Closing" Initialized="Window_Initialized" >
 
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Closed">
+            <c1:MyEventCommand Command="{Binding  ChatWindowClose}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+
     <Grid Background="#00000000">
         <Grid.RowDefinitions>
             <RowDefinition Height="400" ></RowDefinition>
@@ -29,7 +35,7 @@
                                     <ColumnDefinition></ColumnDefinition>
                                     <ColumnDefinition></ColumnDefinition>
                                 </Grid.ColumnDefinitions>
-                                <Label x:Name="friendname" Grid.Column="0" Content="{Binding FriendId}" Background="OrangeRed">
+                                <Label x:Name="friendname" Grid.Column="0" Content="{Binding FriendName}" Background="OrangeRed">
                                 </Label>
                                 <Label x:Name="messagedate" Grid.Column="1" Content="{Binding MessageDate}" Background="Orchid">
                                 </Label>
@@ -42,6 +48,7 @@
                         <DataTemplate.Triggers>
                             <DataTrigger Binding="{Binding Type}" Value="Right">
                                 <Setter TargetName="friendname" Property="Grid.Column" Value="1"></Setter>
+                                <Setter TargetName="friendname" Property="Content" Value="{Binding UserName}"></Setter>
                                 <Setter TargetName="messagedate" Property="Grid.Column" Value="0"></Setter>
                             </DataTrigger>
                         </DataTemplate.Triggers>
@@ -54,7 +61,7 @@
                 <ColumnDefinition Width="400"></ColumnDefinition>
                 <ColumnDefinition></ColumnDefinition>
             </Grid.ColumnDefinitions>
-            <TextBox Grid.Column="0" TextWrapping="Wrap" Text="Mess"></TextBox>
+            <TextBox Grid.Column="0" TextWrapping="Wrap" Text="{Binding Mess}"></TextBox>
             <Button Grid.Column="1" Content="发送" Margin="25">
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="Click">

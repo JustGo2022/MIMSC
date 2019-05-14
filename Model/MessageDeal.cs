@@ -21,7 +21,8 @@ namespace SocketAsyncEventArgsOfficeDemo
             registMessage = 2,
             UserInfo = 3,
             FriendInfo = 4,
-            UserMessage = 5
+            UserMessage = 5,
+            AddFriendRetMessage = 8
         }
 
         public static void ReceiveDeal(SocketAsyncEventArgs e)
@@ -126,6 +127,11 @@ namespace SocketAsyncEventArgsOfficeDemo
                     UserMessageDeal(e);
                     break;
 
+                case messageType.AddFriendRetMessage:
+                    Console.WriteLine("返回的模糊搜索到的用户信息处理");
+                    AddFriendRetMessage(e);
+                    break;
+
                 default:
                     //可能的处理
                     break;
@@ -135,7 +141,7 @@ namespace SocketAsyncEventArgsOfficeDemo
             token.packageType = 0;
         }
 
-        //登陆数据处理函数，未完成，这里直接先发一次数据
+        //登陆数据处理函数
         public static void LandMessDeal(SocketAsyncEventArgs e)
         {
             MClient mClient = MClient.CreateInstance();
@@ -150,10 +156,7 @@ namespace SocketAsyncEventArgsOfficeDemo
             JObject obj = JObject.Parse(jsonStr);
             if (obj["isLand"].ToString().Equals("True"))
             {
-                MessageBox.Show("登陆成功");
-                
-                
-
+                //MessageBox.Show("登陆成功");               
             }
             else
             {
@@ -219,7 +222,7 @@ namespace SocketAsyncEventArgsOfficeDemo
                 SqliteConnect.SqliteInit(obj["id"].ToString());
                 //然后创建好友表和信息表(如果有，不会重复创建)
                 SqliteConnect.CreateTable();
-                //保存自己的最新信息
+                //保存自己的最新信息到数据库
                 SqliteConnect.SaveUserInfo(obj["id"].ToString(), obj["UserName"].ToString(), obj["RealName"].ToString(), obj["Sex"].ToString(),
                                             obj["BirthDay"].ToString(), obj["Address"].ToString(), obj["Email"].ToString(), obj["PhoneNumber"].ToString(),
                                             obj["Remark"].ToString());
@@ -286,6 +289,57 @@ namespace SocketAsyncEventArgsOfficeDemo
                 {
                     SqliteConnect.SaveMessage(obj["FriendId"].ToString(), obj["Message"].ToString(), obj["MessageDate"].ToString());
                 }
+            }
+        }
+
+        public static void AddFriendRetMessage(SocketAsyncEventArgs e)
+        {
+            MClient mClient = MClient.CreateInstance();
+            AsyncUserToken token = (AsyncUserToken)e.UserToken;
+            //得到一个完整的包的数据，放入新list,第二个参数是数据长度，所以要减去8  
+            List<byte> onePackage = token.receiveBuffer.GetRange(8, token.packageLen - 8);
+            //将复制出来的数据从receiveBuffer旧list中删除
+            token.receiveBuffer.RemoveRange(0, token.packageLen);
+            //list要先转换成数组，再转换成字符串
+            String jsonStr = Encoding.Default.GetString(onePackage.ToArray());
+            //得到用户名和密码
+            Console.WriteLine("jsonStr = " + jsonStr);
+            JArray jArray = JArray.Parse(jsonStr);
+
+            if (jArray[0]["isOk"].ToString().Equals("True"))
+            {
+                AddFriendViewModel addFriendViewModel = AddFriendViewModel.CreateInstance();
+                Console.WriteLine("显示模糊搜索到的用户信息");
+                FriendListViewModel friendListViewModel = FriendListViewModel.CreateInstance();
+                MClientViewModel mClientViewModel = MClientViewModel.CreateInstance();
+                foreach (var obj in jArray)
+                {                   
+                    //如果这个用户已经是好友了，那么就继续看下一个
+                    if (friendListViewModel.isFriendList(obj["Id"].ToString()))
+                    {
+                        continue;
+                    }
+                    //把自己的id也排除出去
+                    if (mClientViewModel.UserName.Equals(obj["UserName"].ToString()))
+                    {
+                        continue;
+                    }
+                    FriendInfo friendInfo = new FriendInfo();
+                    friendInfo.Id = obj["Id"].ToString();
+                    friendInfo.FriendName = obj["UserName"].ToString();
+                    //把搜索到的好友数据添加进去
+                    Application.Current.Dispatcher.Invoke(
+                    new Action(() =>
+                    {
+                        //更新查询到的好友信息
+                        addFriendViewModel.FrienInfoGroup.Add(friendInfo);                       
+                    })
+                    );
+                }
+            }
+            else
+            {
+                MessageBox.Show("没有查询到接近的用户");
             }
         }
     }

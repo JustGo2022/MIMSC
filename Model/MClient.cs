@@ -77,33 +77,42 @@ namespace SocketAsyncEventArgsOfficeDemo
         //连接目标ip地址
         public void ConnectServer()
         {
-            //Ip4地址，流方式，Tcp协议
-            connSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            IPEndPoint endPoint = new IPEndPoint(IPAddress.Parse(ip), int.Parse(port));
-            //连接服务端
-            connSocket.Connect(endPoint);
-
-            receiveBuffer = new byte[1024];
-            //receiveBuffer = new byte[2048];
-            sendBuffer = new byte[1024];
-            
-            //因为userToken是同一个,所以设置一个就行
-            ((AsyncUserToken)readSAEA.UserToken).Socket = connSocket;
-            ((AsyncUserToken)readSAEA.UserToken).Remote = endPoint;
-
-            readSAEA.SetBuffer(receiveBuffer, 0, 1014);
- 
-            readSAEA.RemoteEndPoint = endPoint;
-            sendSAEA.RemoteEndPoint = endPoint;
-
-            Console.WriteLine("已经连接");
-
-            //然后直接开启接收的循环
-            bool willRaiseEvent = connSocket.ReceiveAsync(readSAEA);
-            if (!willRaiseEvent)
+            try
             {
-                ProcessReceive(readSAEA);
+                //Ip4地址，流方式，Tcp协议
+                connSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                IPEndPoint endPoint = new IPEndPoint(IPAddress.Parse(ip), int.Parse(port));
+                //连接服务端
+                connSocket.Connect(endPoint);
+
+                receiveBuffer = new byte[1024];
+                //receiveBuffer = new byte[2048];
+                sendBuffer = new byte[1024];
+
+                //因为userToken是同一个,所以设置一个就行
+                ((AsyncUserToken)readSAEA.UserToken).Socket = connSocket;
+                ((AsyncUserToken)readSAEA.UserToken).Remote = endPoint;
+
+                readSAEA.SetBuffer(receiveBuffer, 0, 1014);
+
+                readSAEA.RemoteEndPoint = endPoint;
+                sendSAEA.RemoteEndPoint = endPoint;
+
+                Console.WriteLine("已经连接");
+
+                //然后直接开启接收的循环
+                bool willRaiseEvent = connSocket.ReceiveAsync(readSAEA);
+                if (!willRaiseEvent)
+                {
+                    ProcessReceive(readSAEA);
+                }
             }
+            catch (Exception ex)
+            {
+                MessageBox.Show("无法连接服务器，请稍后重试");
+                System.Environment.Exit(0);
+            }
+            
         }
 
         //什么都还没有写
@@ -279,6 +288,26 @@ namespace SocketAsyncEventArgsOfficeDemo
             this.SendMessage(1, str, sendSAEA);
         }
 
+        //发送聊天信息
+        public void SendChat(String str)
+        {
+            //设置消息类型和消息数据,使用发送函数发送
+            this.SendMessage(6, str, sendSAEA);
+        }
+
+        //发送搜寻好友信息
+        public void SendSearchFriend(String str)
+        {
+            //设置消息类型和消息数据,使用发送函数发送
+            this.SendMessage(7, str, sendSAEA);
+        }
+
+        public void SendFriendRequest(String str)
+        {
+            this.SendMessage(9, str, sendSAEA);
+        }
+
+        //发送聊天消息
         public void SendRegister(String userName, String passWord, String realName, String Sex, String birthDay, String Address, String Email, String phoneNumber, String remark)
         {
             //构造json字符串
