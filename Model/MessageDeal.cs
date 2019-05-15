@@ -21,6 +21,7 @@ namespace SocketAsyncEventArgsOfficeDemo
             registMessage = 2,
             UserInfo = 3,
             FriendInfo = 4,
+            friendrequestMessage = 10,
             UserMessage = 5,
             AddFriendRetMessage = 8
         }
@@ -125,6 +126,11 @@ namespace SocketAsyncEventArgsOfficeDemo
                 case messageType.UserMessage:
                     Console.WriteLine("返回的用户消息处理");
                     UserMessageDeal(e);
+                    break;
+
+                case messageType.friendrequestMessage:
+                    Console.WriteLine("返回的用户请求处理");
+                    FriendRequestMessageDeal(e);
                     break;
 
                 case messageType.AddFriendRetMessage:
@@ -288,6 +294,33 @@ namespace SocketAsyncEventArgsOfficeDemo
                 foreach (var obj in jArray)
                 {
                     SqliteConnect.SaveMessage(obj["FriendId"].ToString(), obj["Message"].ToString(), obj["MessageDate"].ToString());
+                }
+            }
+        }
+
+        //处理好友请求消息
+        public static void FriendRequestMessageDeal(SocketAsyncEventArgs e)
+        {
+            MClient mClient = MClient.CreateInstance();
+            AsyncUserToken token = (AsyncUserToken)e.UserToken;
+            //得到一个完整的包的数据，放入新list,第二个参数是数据长度，所以要减去8  
+            List<byte> onePackage = token.receiveBuffer.GetRange(8, token.packageLen - 8);
+            //将复制出来的数据从receiveBuffer旧list中删除
+            token.receiveBuffer.RemoveRange(0, token.packageLen);
+            //list要先转换成数组，再转换成字符串
+            String jsonStr = Encoding.Default.GetString(onePackage.ToArray());
+            //得到用户名和密码
+            JArray jArray = JArray.Parse(jsonStr);
+
+            if (jArray[0]["isOk"].ToString().Equals("True"))
+            {
+                Console.WriteLine("保存好友信息");
+
+                foreach (var obj in jArray)
+                {
+                    SqliteConnect.SaveFriendRequestInfo(obj["id"].ToString(), obj["UserName"].ToString(), obj["RealName"].ToString(), obj["Sex"].ToString(),
+                                            obj["BirthDay"].ToString(), obj["Address"].ToString(), obj["Email"].ToString(), obj["PhoneNumber"].ToString(),
+                                            obj["Remarks"].ToString());
                 }
             }
         }

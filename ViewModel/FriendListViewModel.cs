@@ -1,6 +1,8 @@
 ﻿using MISMC.Model;
 using MISMC.Windows;
 using MyMVVM;
+using Newtonsoft.Json.Linq;
+using SocketAsyncEventArgsOfficeDemo;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -25,6 +27,7 @@ namespace MISMC.ViewModel
             SqliteConnect.QueryUserInfo(out FriendListViewModel.id, out FriendListViewModel.username, out FriendListViewModel.realname, out FriendListViewModel.sex, out FriendListViewModel.birthday, out FriendListViewModel.address, out FriendListViewModel.email, out FriendListViewModel.phonenumber, out FriendListViewModel.remark);
             //分组列表
             friendGroups = new ObservableCollection<FriendGroup>();
+            friendRequestList = new ObservableCollection<FriendEntity>();
             //启动一个线程，这个函数负责对好友列表界面进行维护
             scanThread = new Thread(FriendListUpdata);
             scanThread.Start();       
@@ -58,7 +61,10 @@ namespace MISMC.ViewModel
                 Application.Current.Dispatcher.Invoke(
                 new Action(() =>
                 {
+                    //更新好友列表信息
                     SqliteConnect.QueryFriendInfo(ref _friends);
+                    //更新好友请求信息
+                    SqliteConnect.QueryFriendRequestInfo(ref friendRequestList);
                 })
                 );
 
@@ -78,6 +84,21 @@ namespace MISMC.ViewModel
             {
                 _friends = value;
                 RaisePropertyChanged("FriendGroup");
+            }
+        }
+
+        //这个是好友请求列表
+        private ObservableCollection<FriendEntity> friendRequestList;
+        public ObservableCollection<FriendEntity> FriendRequestList
+        {
+            get
+            {
+                return friendRequestList;
+            }
+            set
+            {
+                friendRequestList = value;
+                RaisePropertyChanged("FriendRequestList");
             }
         }
 
@@ -315,6 +336,20 @@ namespace MISMC.ViewModel
             return null;
         }
 
+        public static FriendEntity InRequestAdd(ref ObservableCollection<FriendEntity> friendRequestGroup, String name)
+        {
+            foreach (var entity in friendRequestGroup)
+            {
+                if (entity.Name == name)
+                {
+                    return entity;
+                }
+            }
+            FriendEntity friendentity = new FriendEntity();
+            friendRequestGroup.Add(friendentity);
+            return friendentity;
+        }
+
         //好友在不在分组中，在，返回该好友，不在，添加新的好友，返回该好友
         public static FriendEntity InGroupAdd(ref FriendGroup friendGroup, String name)
         {
@@ -411,7 +446,80 @@ namespace MISMC.ViewModel
             }
         }
 
-        
+        //同意好友请求
+        private MyCommand bAgreeFriendRequest;
+        public MyCommand BtAgreeFriendRequest
+        {
+            get
+            {
+                if (bAgreeFriendRequest == null)
+                    bAgreeFriendRequest = new MyCommand(
+                        new Action<object>(
+                            o =>
+                            {
+                                //发送同意消息
+                                JObject obj = new JObject();
+                                obj["Id"] = this.Id;
+                                obj["isAgree"] = "True";
+                                String str = obj.ToString();
+                                MClient mClient = MClient.CreateInstance();
+                                mClient.SendFriendRequestAgree(str);
+                                //删除好友请求表中的内容
+                                SqliteConnect.RemoveFriendQuest(this.Id);
+                                //删除好友请求列表中的内容
+                                FriendListViewModel friendListViewModel = FriendListViewModel.CreateInstance();
+                                foreach (var friend in friendListViewModel.FriendRequestList)
+                                {
+                                    if (friend.Id == this.Id)
+                                    {
+                                        friendListViewModel.FriendRequestList.Remove(friend);
+                                        break;
+                                    }
+                                }
+                                //服务端删除好友请求表中的内容
+                                //然后在双方好友表中添加对方Id，分组为新好友
+                            }));
+                return bAgreeFriendRequest;
+            }
+        }
+
+        //拒绝好友请求
+        private MyCommand bDeagreeFriendRequest;
+        public MyCommand BtDeagreeFriendRequest
+        {
+            get
+            {
+                if (bDeagreeFriendRequest == null)
+                    bDeagreeFriendRequest = new MyCommand(
+                        new Action<object>(
+                            o =>
+                            {
+                                //发送拒绝消息
+                                JObject obj = new JObject();
+                                obj["Id"] = this.Id;
+                                obj["isAgree"] = "False";
+                                String str = obj.ToString();
+                                MClient mClient = MClient.CreateInstance();
+                                mClient.SendFriendRequestAgree(str);
+                                //删除好友请求表中的内容
+                                SqliteConnect.RemoveFriendQuest(this.Id);
+                                //删除好友请求列表中的内容
+                                FriendListViewModel friendListViewModel = FriendListViewModel.CreateInstance();
+                                FriendEntity friendTemp = null;
+                                foreach (var friend in friendListViewModel.FriendRequestList)
+                                {
+                                    if (friend.Id == this.Id)
+                                    {
+                                        friendTemp = friend;
+                                    }
+                                }
+                                friendListViewModel.FriendRequestList.Remove(friendTemp);
+                                //服务端删除好友列表中的内容
+                            }));
+                return bDeagreeFriendRequest;
+            }
+        }
+
     }
 
 

@@ -104,6 +104,7 @@ namespace MISMC.ViewModel
                                 String str = obj.ToString();
                                 MClientViewModel mClientViewModel = MClientViewModel.CreateInstance();
                                 mClientViewModel.Mclient.SendFriendRequest(str);
+                                MessageBox.Show("好友请求已发送");
                             }));
                 return btAdd;
             }

@@ -92,6 +92,26 @@ namespace MISMC.Model
                                                                               + ")";
                     qLiteCommand.ExecuteNonQuery();
                 }
+
+                //下面开始检查好友请求
+                qLiteCommand.CommandText = "SELECT COUNT(*) FROM sqlite_master where type = 'table' and name = 'friendrequest'";
+                //qLiteCommand.Parameters.AddWithValue("@table", "friendinformation");
+
+                if (0 == Convert.ToInt32(qLiteCommand.ExecuteScalar()))
+                {
+                    Console.WriteLine("friendrequest表不存在，那么创建它");
+                    qLiteCommand.CommandText = "create table friendrequest" + "( id INT NOT NULL,"
+                                                                              + " username varchar(20) NOT NULL, "
+                                                                              + " realname varchar(20) NOT NULL, "
+                                                                              + " sex varchar(2) NOT NULL, "
+                                                                              + " birthday data NOT NULL, "
+                                                                              + " address varchar(50) NOT NULL, "
+                                                                              + " email varchar(50) NOT NULL, "
+                                                                              + " phonenumber varchar(11) NOT NULL, "
+                                                                              + " remarks varchar(255) NOT NULL "
+                                                                              + ")";
+                    qLiteCommand.ExecuteNonQuery();
+                }
             }
             catch (Exception ex)
             {
@@ -157,6 +177,91 @@ namespace MISMC.Model
             sQLiteConnection.Close();
         }
 
+        //保存请求好友的用户的详细信息
+        public static void SaveFriendRequestInfo(String id,  String username, String realname, String sex, String birthday, String address, String email, String phonenumber, String reamarks)
+        {
+            //先获得一个数据库连接
+            SQLiteConnection sQLiteConnection = SqliteConnect.GetSqliteConnect();
+            sQLiteConnection.Open();
+            try
+            {
+                
+                SQLiteCommand qLiteCommand = sQLiteConnection.CreateCommand();
+
+                qLiteCommand.CommandText = "SELECT COUNT(*) FROM friendrequest where id = @id";
+                qLiteCommand.Parameters.AddWithValue("@id", id);
+
+                Console.WriteLine(qLiteCommand.CommandText.ToString());
+                Console.WriteLine("查询该请求用户信息是否已经存在 = " + Convert.ToInt32(qLiteCommand.ExecuteScalar()));
+                Console.WriteLine("该请求用户的id为 = " + id);
+
+                if (0 == Convert.ToInt32(qLiteCommand.ExecuteScalar()))
+                {
+                    Console.WriteLine("插入了好友请求的用户的信息");
+                    //如果不存在该好友的详细信息，就插入
+                    qLiteCommand.CommandText = "insert into friendrequest (id,username,realname,sex,birthday,address,email,phonenumber,remarks) " +
+                                           "values(@friendid,@username,@realname,@sex,@birthday,@address,@email,@phonenumber,@remarks)";
+                    qLiteCommand.Parameters.AddWithValue("@friendid", id);
+                    qLiteCommand.Parameters.AddWithValue("@username", username);
+                    qLiteCommand.Parameters.AddWithValue("@realname", realname);
+                    qLiteCommand.Parameters.AddWithValue("@sex", sex);
+                    qLiteCommand.Parameters.AddWithValue("@birthday", birthday);
+                    qLiteCommand.Parameters.AddWithValue("@address", address);
+                    qLiteCommand.Parameters.AddWithValue("@email", email);
+                    qLiteCommand.Parameters.AddWithValue("@phonenumber", phonenumber);
+                    qLiteCommand.Parameters.AddWithValue("@remarks", reamarks);
+                    qLiteCommand.ExecuteNonQuery();
+                }
+                else
+                {
+                    Console.WriteLine("更新了请求信息");
+                    //如果存在，就更新
+                    qLiteCommand.CommandText = "update friendinformation set username = @username,realname = @realname,sex = @sex,birthday = @birthday,address = @address,email = @email,phonenumber = @phonenumber,remarks = @remarks " +
+                                                "where id = @friendid";
+                    qLiteCommand.Parameters.AddWithValue("@friendid", id);
+                    qLiteCommand.Parameters.AddWithValue("@username", username);
+                    qLiteCommand.Parameters.AddWithValue("@realname", realname);
+                    qLiteCommand.Parameters.AddWithValue("@sex", sex);
+                    qLiteCommand.Parameters.AddWithValue("@birthday", birthday);
+                    qLiteCommand.Parameters.AddWithValue("@address", address);
+                    qLiteCommand.Parameters.AddWithValue("@email", email);
+                    qLiteCommand.Parameters.AddWithValue("@phonenumber", phonenumber);
+                    qLiteCommand.Parameters.AddWithValue("@remarks", reamarks);
+                    qLiteCommand.ExecuteNonQuery();
+                }
+  
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("SaveFriendRequestInfo Error : " + ex);
+            }
+            sQLiteConnection.Close();
+        }
+
+        public static void RemoveFriendQuest(String id)
+        {
+            //先获得一个数据库连接
+            SQLiteConnection sQLiteConnection = SqliteConnect.GetSqliteConnect();
+            sQLiteConnection.Open();
+            try
+            {
+
+                SQLiteCommand qLiteCommand = sQLiteConnection.CreateCommand();
+
+                qLiteCommand.CommandText = "delete from friendrequest where id = @id";
+                qLiteCommand.Parameters.AddWithValue("@id", id);
+
+                qLiteCommand.ExecuteNonQuery();
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("RemoveFriendQuest Error : " + ex);
+            }
+            sQLiteConnection.Close();
+        }
+
         //保存好友的详细信息
         public static void SaveFriendInfo(String id, String friendgroup, String username, String realname, String sex, String birthday, String address, String email, String phonenumber, String reamarks)
         {
@@ -165,7 +270,7 @@ namespace MISMC.Model
             sQLiteConnection.Open();
             try
             {
-                
+
                 SQLiteCommand qLiteCommand = sQLiteConnection.CreateCommand();
 
                 qLiteCommand.CommandText = "SELECT COUNT(*) FROM friendinformation where id = @id";
@@ -211,7 +316,7 @@ namespace MISMC.Model
                     qLiteCommand.Parameters.AddWithValue("@remarks", reamarks);
                     qLiteCommand.ExecuteNonQuery();
                 }
-  
+
 
             }
             catch (Exception ex)
@@ -366,6 +471,59 @@ namespace MISMC.Model
             Console.WriteLine("好友信息查询结束");
         }
 
+        //查询好友请求信息
+        public static void QueryFriendRequestInfo(ref ObservableCollection<FriendEntity> friendRequestList)
+        {
+            //先获得一个数据库连接
+            Console.WriteLine("好友请求信息查询开始");
+            SQLiteConnection sQLiteConnection = SqliteConnect.GetSqliteConnect();
+            sQLiteConnection.Open();
+            try
+            {
+
+                SQLiteCommand qLiteCommand = sQLiteConnection.CreateCommand();
+
+
+                //先分组，再排序
+                qLiteCommand.CommandText = "select * from friendrequest";
+                //获得查询结果集
+                SQLiteDataReader sqlitreader = qLiteCommand.ExecuteReader();
+
+
+                //循环改变friendcollection的值
+                //保存上一个分组
+                FriendEntity friendEntity;
+                while (sqlitreader.Read())
+                {
+                    //TODO已经被删除的好友，想办法从分组中删除
+                    //如果这个分组与上个分组不一致
+                    //还要看分组列表中是不是已经有这个列表了
+                    //如果有，就从分组列表中取出这个分组进行操作
+                    //还要看分组中是不是已经有好友信息了，如果已经有了，那么只需要进行更新就行
+
+                    //检查好友List中有没有此好友，有这个好友，返回这个好友。没有，那么新建好友，返回新建的好友
+                    friendEntity = FriendEntity.InRequestAdd(ref friendRequestList, sqlitreader[1].ToString());
+                    //获得好友信息
+                    friendEntity.Id = sqlitreader[0].ToString();
+                    friendEntity.Name = sqlitreader[1].ToString();
+                    friendEntity.RealName = sqlitreader[2].ToString();
+                    friendEntity.Sex = sqlitreader[3].ToString();
+                    friendEntity.BirthDay = sqlitreader[4].ToString();
+                    friendEntity.Address = sqlitreader[5].ToString();
+                    friendEntity.Email = sqlitreader[6].ToString();
+                    friendEntity.PhoneNumber = sqlitreader[7].ToString();
+                    friendEntity.Remarks = sqlitreader[8].ToString();
+                }
+                sqlitreader.Close();
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("QueryFriendRequetInfo Error : " + ex);
+            }
+            sQLiteConnection.Close();
+            Console.WriteLine("好友请求信息查询结束");
+        }
 
 
         //查询对应好友的聊天信息

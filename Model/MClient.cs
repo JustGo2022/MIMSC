@@ -307,6 +307,11 @@ namespace SocketAsyncEventArgsOfficeDemo
             this.SendMessage(9, str, sendSAEA);
         }
 
+        public void SendFriendRequestAgree(String str)
+        {
+            this.SendMessage(11, str, sendSAEA);
+        }
+
         //发送聊天消息
         public void SendRegister(String userName, String passWord, String realName, String Sex, String birthDay, String Address, String Email, String phoneNumber, String remark)
         {

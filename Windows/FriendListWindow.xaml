@@ -198,7 +198,8 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"></RowDefinition>
             <RowDefinition Height="auto"></RowDefinition>
-            <RowDefinition></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
         </Grid.RowDefinitions>
         <Grid Grid.Row="0">
             <Label Content="{Binding UserName}"></Label>
@@ -212,7 +213,42 @@
                 </i:Interaction.Triggers>
             </Button>
         </ToolBar>
-        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Visible">
+
+        <ScrollViewer  Name="scroll" VerticalScrollBarVisibility="Visible" Grid.Row="2"  >
+            <ItemsControl x:Name="itcl" ItemsSource="{Binding FriendRequestList}" >
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel></StackPanel>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="{Binding Name}"></Label>
+                            <Button Content="同意">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="Click">
+                                        <c1:MyEventCommand Command="{Binding  BtAgreeFriendRequest}"/>
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </Button>
+                            <Button Content="拒绝">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="Click">
+                                        <c1:MyEventCommand Command="{Binding  BtDeagreeFriendRequest}"/>
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </Button>
+                        </StackPanel>
+                        <DataTemplate.Triggers>
+
+                        </DataTemplate.Triggers>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+        <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Visible">
             <ItemsControl ItemsSource="{Binding friendGroups}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
