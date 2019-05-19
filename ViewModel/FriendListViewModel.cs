@@ -57,7 +57,7 @@ namespace MISMC.ViewModel
             //TODO  其实还是可以先用数据库读取完，得到结果再使用Application.Current.Dispatcher.Invoke方法，因为数据库操作还是很占时间的
             while (true)
             {
-                
+               // MessageBox.Show("这里就查询了一次");
                 Application.Current.Dispatcher.Invoke(
                 new Action(() =>
                 {
@@ -299,6 +299,22 @@ namespace MISMC.ViewModel
         public String PhoneNumber { get; set; }
         public String Remarks { get; set; }
 
+
+        //这里要加这个，要不然在ViewModel中更新的时候，不会返回给客户端
+        public String status;
+        public String Status
+        {
+            get { return status; }
+            set
+            {
+                if (status != value)
+                {
+                    status = value;
+                    RaisePropertyChanged("Status");
+                }
+            }
+        }
+
         public ChatWindow chatWindow { get; set; }
         public FriendInfoWindow friendInfoWindow { get; set; }
 
@@ -309,6 +325,7 @@ namespace MISMC.ViewModel
         {
             chatWindow = null;
             friendInfoWindow = null;
+            Status = "0";
 
             //这里注册右键菜单
             contextMenu = new ContextMenu();
@@ -397,6 +414,26 @@ namespace MISMC.ViewModel
             if (friendGroup.Friends.Count == 0)
             {
                 friendGroups.Remove(friendGroup);
+            }
+        }
+
+        //更新好友状态
+        //TODO这样子应该很影响性能，最好是放到数据库中，或者将这个改为字典
+        public static void UpdateFriendStatus(ObservableCollection<FriendGroup> friendGroups, String id, String Group, String Status)
+        {
+            foreach(var friendgroup in friendGroups)
+            {
+                if (friendgroup.Name.Equals(Group))
+                {
+                    foreach(var friend in friendgroup.Friends)
+                    {
+                        if (friend.Id.Equals(id))
+                        {
+                            friend.Status = Status;
+                            //MessageBox.Show(friend.Status);
+                        }
+                    }
+                }
             }
         }
 

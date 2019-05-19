@@ -469,15 +469,20 @@ IsTabStop="False" Margin="2" VerticalAlignment="Stretch"  />
                                                     <RowDefinition></RowDefinition>
                                                 </Grid.RowDefinitions>
                                                 <StackPanel Grid.ColumnSpan="2" Grid.RowSpan="2">
-                                                    <Label Content="{Binding Name}" FontSize="20" Margin="0,5,0,0" >
-                                                        <i:Interaction.Triggers>
-                                                            <i:EventTrigger EventName="MouseDoubleClick">
-                                                                <c1:MyEventCommand Command="{Binding  BtOpenChat}"/>
-                                                            </i:EventTrigger>
-                                                        </i:Interaction.Triggers>
-                                                    </Label>
-                                                    <TextBlock Margin="10,5,0,0" Style="{StaticResource TextBlockStyle1}"  Text="{Binding Remarks}" ></TextBlock>
-                                                </StackPanel>
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <Label Content="{Binding Name}" FontSize="20" Margin="0,5,0,0" >
+                                                            <i:Interaction.Triggers>
+                                                                <i:EventTrigger EventName="MouseDoubleClick">
+                                                                    <c1:MyEventCommand Command="{Binding  BtOpenChat}"/>
+                                                                </i:EventTrigger>
+                                                            </i:Interaction.Triggers>
+                                                        </Label>
+                                                        <Label  x:Name="isOnline" Margin="160,0,0,0"></Label>
+                                                    </StackPanel>
+                                                        
+                                                        <TextBlock Margin="10,5,0,0" Style="{StaticResource TextBlockStyle1}"  Text="{Binding Remarks}" ></TextBlock>
+                                                    </StackPanel>
+                                                
                                                 <i:Interaction.Triggers>
                                                     <i:EventTrigger EventName="MouseRightButtonUp">
                                                         <c1:MyEventCommand Command="{Binding  BtOpenChoose}"/>
@@ -485,6 +490,16 @@ IsTabStop="False" Margin="2" VerticalAlignment="Stretch"  />
                                                 </i:Interaction.Triggers>
                                             </Grid>
                                             <DataTemplate.Triggers>
+                                                <DataTrigger Binding="{Binding Status}" Value="1">
+                                                    <Setter Property="Background" TargetName="bk" Value="#ffff99"/>
+                                                    <Setter Property="Content" TargetName="isOnline" Value="在线"></Setter>
+                                                    <Setter Property="Foreground" TargetName="isOnline" Value="#ff99a4"></Setter>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Status}" Value="0">
+                                                    <Setter Property="Background" TargetName="bk" Value="#808080"/>
+                                                    <Setter Property="Content" TargetName="isOnline" Value="离线"></Setter>
+                                                    <Setter Property="Foreground" TargetName="isOnline" Value="#1e2929"></Setter>
+                                                </DataTrigger>
                                                 <Trigger Property="IsMouseOver" Value="true">
                                                     <Setter Property="Background" TargetName="bk" Value="#15333333"/>
                                                 </Trigger>

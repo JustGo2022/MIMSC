@@ -25,7 +25,8 @@ namespace SocketAsyncEventArgsOfficeDemo
             UserMessage = 5,
             AddFriendRetMessage = 8,
             ChangeGroupMessage = 13,
-            DeleteFriendMessage = 15
+            DeleteFriendMessage = 15,
+            FriendStatusMessage = 16
         }
 
         public static void ReceiveDeal(SocketAsyncEventArgs e)
@@ -148,6 +149,11 @@ namespace SocketAsyncEventArgsOfficeDemo
                 case messageType.DeleteFriendMessage:
                     Console.WriteLine("返回的删除好友信息处理");
                     DeleteFriendMessage(e);
+                    break;
+
+                case messageType.FriendStatusMessage:
+                    Console.WriteLine("返回的好友状态信息处理");
+                    FriendStatusMessage(e);
                     break;
 
                 default:
@@ -469,6 +475,42 @@ namespace SocketAsyncEventArgsOfficeDemo
                 );
 
         }
-        
+
+        //更新好友状态
+        public static void FriendStatusMessage(SocketAsyncEventArgs e)
+        {
+            MClient mClient = MClient.CreateInstance();
+            AsyncUserToken token = (AsyncUserToken)e.UserToken;
+            //得到一个完整的包的数据，放入新list,第二个参数是数据长度，所以要减去8  
+            List<byte> onePackage = token.receiveBuffer.GetRange(8, token.packageLen - 8);
+            //将复制出来的数据从receiveBuffer旧list中删除
+            token.receiveBuffer.RemoveRange(0, token.packageLen);
+            //list要先转换成数组，再转换成字符串
+            String jsonStr = Encoding.Default.GetString(onePackage.ToArray());
+            //得到用户名和密码
+            Console.WriteLine("jsonStr = " + jsonStr);
+            JArray jArray = JArray.Parse(jsonStr);
+
+            foreach(var obj in jArray)
+            {
+                //修改好友状态
+                Application.Current.Dispatcher.Invoke(
+                new Action(() =>
+                {
+                    FriendListViewModel friendListViewModel = FriendListViewModel.CreateInstance();
+                    try
+                    {
+
+                        FriendEntity.UpdateFriendStatus(friendListViewModel.friendGroups, obj["id"].ToString(), obj["Group"].ToString(), obj["Status"].ToString());
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.Write(ex);
+                    }
+                    
+                })
+                );
+            }
+        }
     }
 }

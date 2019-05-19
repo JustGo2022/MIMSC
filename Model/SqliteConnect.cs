@@ -304,7 +304,7 @@ namespace MISMC.Model
                 {
                     Console.WriteLine("更新了好友信息");
                     //如果存在，就更新
-                    qLiteCommand.CommandText = "update friendinformation set friendgroup = @friendgroup, username = @username,realname = @realname,sex = @sex,birthday = @birthday,address = @address,email = @email,phonenumber = @phonenumber,remarks = @remarks ,updatetime = @update" +
+                    qLiteCommand.CommandText = "update friendinformation set friendgroup = @friendgroup, username = @username,realname = @realname,sex = @sex,birthday = @birthday,address = @address,email = @email,phonenumber = @phonenumber,remarks = @remarks ,updatetime = @update " +
                                                 "where id = @friendid";
                     qLiteCommand.Parameters.AddWithValue("@friendid", id);
                     qLiteCommand.Parameters.AddWithValue("@friendgroup", friendgroup);
@@ -636,7 +636,7 @@ namespace MISMC.Model
             {
                 SQLiteCommand qLiteCommand = sQLiteConnection.CreateCommand();
 
-                qLiteCommand.CommandText = "delete * FROM friendinformation where updatetime < @time";
+                qLiteCommand.CommandText = "delete FROM friendinformation where updatetime < @time";
                 qLiteCommand.Parameters.AddWithValue("@time", DateTime);
                 qLiteCommand.ExecuteNonQuery();
             }
