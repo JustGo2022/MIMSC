@@ -26,7 +26,8 @@ namespace SocketAsyncEventArgsOfficeDemo
             AddFriendRetMessage = 8,
             ChangeGroupMessage = 13,
             DeleteFriendMessage = 15,
-            FriendStatusMessage = 16
+            FriendStatusMessage = 16,
+            ChangePassReturnMessage = 18
         }
 
         public static void ReceiveDeal(SocketAsyncEventArgs e)
@@ -154,6 +155,11 @@ namespace SocketAsyncEventArgsOfficeDemo
                 case messageType.FriendStatusMessage:
                     Console.WriteLine("返回的好友状态信息处理");
                     FriendStatusMessage(e);
+                    break;
+
+                case messageType.ChangePassReturnMessage:
+                    Console.WriteLine("返回修改密码结果处理");
+                    ChangePassReturnMessage(e);
                     break;
 
                 default:
@@ -510,6 +516,30 @@ namespace SocketAsyncEventArgsOfficeDemo
                     
                 })
                 );
+            }
+        }
+
+        public static void ChangePassReturnMessage(SocketAsyncEventArgs e)
+        {
+            MClient mClient = MClient.CreateInstance();
+            AsyncUserToken token = (AsyncUserToken)e.UserToken;
+            //得到一个完整的包的数据，放入新list,第二个参数是数据长度，所以要减去8  
+            List<byte> onePackage = token.receiveBuffer.GetRange(8, token.packageLen - 8);
+            //将复制出来的数据从receiveBuffer旧list中删除
+            token.receiveBuffer.RemoveRange(0, token.packageLen);
+            //list要先转换成数组，再转换成字符串
+            String jsonStr = Encoding.Default.GetString(onePackage.ToArray());
+            //得到用户名和密码
+            Console.WriteLine("jsonStr = " + jsonStr);
+            JObject obj = JObject.Parse(jsonStr);
+
+            if (obj["isOK"].ToString().Equals("True"))
+            {
+                MessageBox.Show("密码修改成功");
+            }
+            else
+            {
+                MessageBox.Show("密码修改失败");
             }
         }
     }

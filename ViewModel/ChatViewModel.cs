@@ -67,6 +67,8 @@ namespace MISMC.ViewModel
 
         //扫描线程
         Thread scanThread;
+        double oldHeight = 0;
+        double newHeight = 0;
 
         private String nowname;
         public String NowName
@@ -340,6 +342,49 @@ namespace MISMC.ViewModel
                                 //this.RigistButtonCheck();
                             });
                 return tbMess;
+            }
+        }
+
+        private MyCommand<ScrollViewer> btGetOldMessage;
+        public MyCommand<ScrollViewer> BtGetOldMessage
+        {
+            get
+            {
+                if (btGetOldMessage == null)
+                    btGetOldMessage = new MyCommand<ScrollViewer>(
+                        (
+                            scorll =>
+                            {
+                                if (scorll.Visibility == Visibility.Visible)
+                                {
+                                    if (scorll.VerticalOffset == 0)
+                                    {
+                                                                              
+                                        //第一次，更新oldHeight,而且更新聊天信息
+                                        if (oldHeight == 0 && newHeight == 0)
+                                        {
+                                            oldHeight = scorll.ScrollableHeight;
+                                            //更新旧的聊天信息
+                                            SqliteConnect.QueryMessageOld(this.NowName, this.UserName, this.FriendId, ref _messageMixGroup);
+                                        }
+                                        else if (oldHeight != 0 && newHeight == 0)
+                                        {
+                                            newHeight = scorll.ScrollableHeight;
+
+                                            //向下移动
+                                            scorll.ScrollToVerticalOffset(newHeight - oldHeight);
+
+                                            //MessageBox.Show("改变了位置");
+
+                                            oldHeight = 0;
+                                            newHeight = 0;
+                                        }
+
+                                    }
+                                }
+                                
+                            }));
+                return btGetOldMessage;
             }
         }
     }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MISMC.Model
 {
-    //这个类是用来保存当前使用用户的信息的，因为时单例模式，所以在哪里都可以拿到这个类的唯一副本
+    //这个类是用来保存当前使用用户的信息的，因为是单例模式，所以在哪里都可以拿到这个类的唯一副本
     public class UserInfo
     {
         public String UserName { get; set; }

@@ -386,12 +386,33 @@ IsTabStop="False" Margin="2" VerticalAlignment="Stretch"  />
         <Grid Grid.Row="1">
             <StackPanel Background="#E4E2E3">
                 <TextBlock Text="{Binding UserName}" Foreground="#676863" FontSize="30"></TextBlock>
-                <TextBlock Text="{Binding Remark}" Foreground="#407D6E" FontSize="20" TextWrapping="Wrap"></TextBlock>
+                <TextBlock Text="{Binding Remark,UpdateSourceTrigger=PropertyChanged}" Foreground="#407D6E" FontSize="20" TextWrapping="Wrap"></TextBlock>
             </StackPanel>
 
         </Grid>
-        <ToolBar Grid.Row="2">
-            <Button Content="添加好友">
+        <ToolBar  Grid.Row="2">
+            <Button Margin="0,0,52,0" Style="{StaticResource FilletButton}" Content="个人信息">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="Click">
+                        <c1:MyEventCommand Command="{Binding  BtUserInfo}"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </Button>
+            <Button Margin="0,0,52,0" Style="{StaticResource FilletButton}" Content="修改信息">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="Click">
+                        <c1:MyEventCommand Command="{Binding  BtModeMessage}"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </Button>
+            <Button Margin="0,0,52,0" Style="{StaticResource FilletButton}" Content="修改密码">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="Click">
+                        <c1:MyEventCommand Command="{Binding  BtModePassWord}"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </Button>
+            <Button Margin="0,0,0,0" Style="{StaticResource FilletButton}" Content="添加好友">
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="Click">
                         <c1:MyEventCommand Command="{Binding  BtAddFriend}"/>
@@ -400,7 +421,7 @@ IsTabStop="False" Margin="2" VerticalAlignment="Stretch"  />
             </Button>
         </ToolBar>
 
-        <ScrollViewer Background="#474127"  Name="scroll" Height="50" VerticalScrollBarVisibility="Visible" Grid.Row="3"  >
+        <ScrollViewer Background="#474127"  Name="scroll" Height="auto" VerticalScrollBarVisibility="Visible" Grid.Row="3"  >
             
             <ItemsControl x:Name="itcl" ItemsSource="{Binding FriendRequestList}" >
                 <ItemsControl.ItemsPanel>
@@ -437,7 +458,9 @@ IsTabStop="False" Margin="2" VerticalAlignment="Stretch"  />
             </ItemsControl>
         </ScrollViewer>
 
-        <ScrollViewer Grid.Row="4"  VerticalScrollBarVisibility="Visible"  Margin="0,0,0,46" >
+        <ScrollViewer Grid.Row="4"  VerticalScrollBarVisibility="Visible"  Margin="0,0.2,0,0" >
+            
+
             <ItemsControl ItemsSource="{Binding friendGroups}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
@@ -469,16 +492,20 @@ IsTabStop="False" Margin="2" VerticalAlignment="Stretch"  />
                                                     <RowDefinition></RowDefinition>
                                                 </Grid.RowDefinitions>
                                                 <StackPanel Grid.ColumnSpan="2" Grid.RowSpan="2">
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <Label Content="{Binding Name}" FontSize="20" Margin="0,5,0,0" >
+                                                    <Grid >
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="300"></ColumnDefinition>
+                                                            <ColumnDefinition Width="100"></ColumnDefinition>
+                                                        </Grid.ColumnDefinitions>
+                                                        <Label Grid.Column="0" Content="{Binding Name}" FontSize="20" Margin="0,5,0,0" >
                                                             <i:Interaction.Triggers>
                                                                 <i:EventTrigger EventName="MouseDoubleClick">
                                                                     <c1:MyEventCommand Command="{Binding  BtOpenChat}"/>
                                                                 </i:EventTrigger>
                                                             </i:Interaction.Triggers>
                                                         </Label>
-                                                        <Label  x:Name="isOnline" Margin="160,0,0,0"></Label>
-                                                    </StackPanel>
+                                                        <Label Grid.Column="1"  x:Name="isOnline" ></Label>
+                                                    </Grid>
                                                         
                                                         <TextBlock Margin="10,5,0,0" Style="{StaticResource TextBlockStyle1}"  Text="{Binding Remarks}" ></TextBlock>
                                                     </StackPanel>

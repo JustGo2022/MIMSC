@@ -273,6 +273,8 @@ namespace SocketAsyncEventArgsOfficeDemo
             //throws if client process has already closed
             catch (Exception) { }
             connSocket.Close();
+            MessageBox.Show("与服务端断开连接，退出");
+            System.Environment.Exit(0);
         }
 
         public void SendLogin(String userName, String passWord)
@@ -322,6 +324,18 @@ namespace SocketAsyncEventArgsOfficeDemo
         public void SendDeleteFriend(String str)
         {
             this.SendMessage(14, str, sendSAEA);
+        }
+
+        //发送信息修改 
+        public void SendModeMessage(String str)
+        {
+            this.SendMessage(17, str, sendSAEA);
+        }
+
+        //发送密码修改 
+        public void SendModePassWordMessage(String str)
+        {
+            this.SendMessage(18, str, sendSAEA);
         }
 
         //发送聊天消息

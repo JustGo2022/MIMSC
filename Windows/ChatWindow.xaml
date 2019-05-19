@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:MISMC.Windows"
         xmlns:c1="clr-namespace:MyMVVM"
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:ei="clr-namespace:Microsoft.Expression.Interactivity.Input;assembly=Microsoft.Expression.Interactions"
         mc:Ignorable="d"
         Title="{Binding UserName}" Height="600" Width="600" Closing="Window_Closing" Initialized="Window_Initialized" 
         Background="AliceBlue" AllowsTransparency="True" WindowStyle="None"
@@ -201,8 +202,15 @@ IsTabStop="False" Margin="2" VerticalAlignment="Stretch"  />
             <RowDefinition Height="400" ></RowDefinition>
             <RowDefinition Height="180"></RowDefinition>
         </Grid.RowDefinitions>
-        <ScrollViewer Name="scroll" VerticalScrollBarVisibility="Visible" Grid.Row="0" SizeChanged="scroll_SizeChanged"  >
-            <ItemsControl x:Name="itcl" ItemsSource="{Binding MessageMixGroup}">
+        <ScrollViewer Name="scroll" VerticalScrollBarVisibility="Auto" Grid.Row="0" SizeChanged="scroll_SizeChanged"  >
+
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="ScrollChanged">
+                        <c1:MyEventCommand Command="{Binding  BtGetOldMessage}" CommandParateter="{Binding ElementName=scroll}"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+
+                <ItemsControl x:Name="itcl" ItemsSource="{Binding MessageMixGroup}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <StackPanel></StackPanel>
@@ -246,27 +254,31 @@ IsTabStop="False" Margin="2" VerticalAlignment="Stretch"  />
                 <ColumnDefinition Width="400"></ColumnDefinition>
                 <ColumnDefinition></ColumnDefinition>
             </Grid.ColumnDefinitions>
-            <Grid Grid.Column="0" >
-                <Grid.RowDefinitions>
-                    <RowDefinition></RowDefinition>
-                    <RowDefinition Height="auto"></RowDefinition>
-                </Grid.RowDefinitions>
-                <TextBox Style="{StaticResource TextBoxStyle1}" Grid.Row="0" Height="auto" TextWrapping="Wrap" Text="{Binding Mess,UpdateSourceTrigger=PropertyChanged}">
-                    <i:Interaction.Triggers>
-                        <i:EventTrigger EventName="TextChanged">
-                            <c1:MyEventCommand Command="{Binding  TbMess}" CommandParateter="{Binding ElementName=tbMessTips}"/>
-                        </i:EventTrigger>
-                    </i:Interaction.Triggers>
-                </TextBox>
-                <TextBlock Grid.Row="1" x:Name="tbMessTips" ></TextBlock>
-            </Grid>
-            
-            <Button Grid.Column="1" Style="{StaticResource FilletButton}" IsHitTestVisible="{Binding isSend}" Content="发送" Margin="25">
+                <Grid Grid.Column="0" >
+                    <Grid.RowDefinitions>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition Height="auto"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <TextBox Style="{StaticResource TextBoxStyle1}" Grid.Row="0" Height="auto" TextWrapping="Wrap" Text="{Binding Mess,UpdateSourceTrigger=PropertyChanged}">
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="TextChanged">
+                                <c1:MyEventCommand Command="{Binding  TbMess}" CommandParateter="{Binding ElementName=tbMessTips}"/>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                    </TextBox>
+                    <TextBlock Grid.Row="1" x:Name="tbMessTips" ></TextBlock>
+                </Grid>
+
+                <Button Grid.Column="1" Style="{StaticResource FilletButton}" IsHitTestVisible="{Binding isSend}" Content="发送" Margin="25">
                 <i:Interaction.Triggers>
-                    <i:EventTrigger EventName="Click">
-                        <c1:MyEventCommand Command="{Binding  BtSendMessage}"/>
-                    </i:EventTrigger>
-                </i:Interaction.Triggers>
+                        <i:EventTrigger EventName="Click">
+                            <c1:MyEventCommand Command="{Binding  BtSendMessage}"/>
+                        </i:EventTrigger>
+                        <ei:KeyTrigger FiredOn="KeyUp" Key="Enter">
+                            <i:InvokeCommandAction Command="{Binding BtSendMessage}"/>
+                        </ei:KeyTrigger>
+                    </i:Interaction.Triggers>
+                    
             </Button>
         </Grid>
     </Grid>

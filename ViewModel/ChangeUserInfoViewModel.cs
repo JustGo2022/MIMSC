@@ -1,5 +1,6 @@
 ﻿using MISMC.Model;
 using MyMVVM;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,19 +10,15 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
-using Winform = System.Windows.Forms;
 using System.Windows.Media;
 
 namespace MISMC.ViewModel
 {
-    class RegisterViewModel : NotifyObject
+    class ChangeUserInfoViewModel : NotifyObject
     {
         //用来操作mClientViewModel中mClient的注册信息发送函数
         public MClientViewModel mClientViewModel;
 
-        bool boUserName;
-        bool boPassWord;
-        bool boSPassWord;
         bool boRealName;
         bool boSex;
         bool boBirthDay;
@@ -29,15 +26,12 @@ namespace MISMC.ViewModel
         bool boEmail;
         bool boPhoneNumber;
         bool boRemark;
-        
+
 
         //RegisterViewModel的构造函数
-        public RegisterViewModel()
+        public ChangeUserInfoViewModel()
         {
             mClientViewModel = MClientViewModel.CreateInstance();
-            this.UserName = "";
-            this.PassWord = "";
-            this.sPassWord = "";
             this.RealName = "";
             this.Sex = "";
             this.Address = "";
@@ -46,17 +40,25 @@ namespace MISMC.ViewModel
             this.Remark = "";
             this.isRegist = "false";
 
-            boUserName = false;
-            boPassWord = false;
-            boSPassWord = false;
-            boRealName = false;
+            boRealName = true;
             boSex = false;
             boBirthDay = false;
-            boAddress = false;
-            boEmail = false;
-            boPhoneNumber = false;
-            boRemark = false;
+            boAddress = true;
+            boEmail = true;
+            boPhoneNumber = true;
+            boRemark = true;
         }
+
+        public void SetInfo(String RealName, String Sex, String Address, String Email, String PhoneNumber, String Remark)
+        {
+            this.RealName = RealName;
+            this.Sex = Sex;
+            this.Address = Address;
+            this.Email = Email;
+            this.PhoneNumber = PhoneNumber;
+            this.Remark = Remark;
+        }
+
 
         //RegisterViewModel的单例函数
         private static RegisterViewModel registerViewModel = null;
@@ -69,47 +71,6 @@ namespace MISMC.ViewModel
             return registerViewModel;
         }
 
-        private String username;
-        public String UserName
-        {
-            get { return username; }
-            set
-            {
-                if (username != value)
-                {
-                    username = value;
-                    RaisePropertyChanged("UserName");
-                }
-            }
-        }
-
-        private String password;
-        public String PassWord
-        {
-            get { return password; }
-            set
-            {
-                if (password != value)
-                {
-                    password = value;
-                    RaisePropertyChanged("PassWord");
-                }
-            }
-        }
-
-        private String spassword;
-        public String sPassWord
-        {
-            get { return spassword; }
-            set
-            {
-                if (spassword != value)
-                {
-                    spassword = value;
-                    RaisePropertyChanged("sPassWord");
-                }
-            }
-        }
 
         private String realname;
         public String RealName
@@ -225,7 +186,7 @@ namespace MISMC.ViewModel
 
         public void RigistButtonCheck()
         {
-            if (boUserName&&boPassWord&&boSPassWord&&boRealName&&boBirthDay&&boAddress&&boEmail&&boPhoneNumber&&boRemark)
+            if (boRealName && boBirthDay && boAddress && boEmail && boPhoneNumber && boRemark)
             {
                 isRegist = "true";
             }
@@ -236,73 +197,45 @@ namespace MISMC.ViewModel
 
         }
 
-        private MyCommand btRegister;
-        public MyCommand BtRegister
+        private MyCommand<Window> btRegister;
+        public MyCommand<Window> BtRegister
         {
             get
             {
                 if (btRegister == null)
-                    btRegister = new MyCommand(
-                        new Action<object>(
-                            o =>
+                    btRegister = new MyCommand<Window>(
+                            window =>
                             {
-                                //MessageBox.Show("注册按钮");
-                                mClientViewModel.Mclient.SendRegister(UserName, PassWord, RealName, Sex, BirthDay, Address, Email, PhoneNumber, Remark);
-                            }));
+                                MessageBoxResult boxResult = MessageBox.Show("确认修改？", "提示", MessageBoxButton.OKCancel, MessageBoxImage.Question);
+
+                                if (MessageBoxResult.OK == boxResult)
+                                {
+                                    JObject obj = new JObject();
+                                    obj["RealName"] = this.RealName;
+                                    obj["Sex"] = this.Sex;
+                                    obj["BirthDay"] = this.BirthDay;
+                                    obj["Address"] = this.Address;
+                                    obj["Email"] = this.Email;
+                                    obj["PhoneNumber"] = this.PhoneNumber;
+                                    obj["Remark"] = this.Remark;
+                                    String str = obj.ToString();
+                                    //发送给服务端
+                                    mClientViewModel.Mclient.SendModeMessage(str);
+                                    //更新本地的用户信息类
+                                    FriendListViewModel friendListViewModel = FriendListViewModel.CreateInstance();
+                                    friendListViewModel.RealName= this.RealName;
+                                    friendListViewModel.Sex = this.Sex;
+                                    friendListViewModel.BirthDay = this.BirthDay;
+                                    friendListViewModel.Address = this.Address;
+                                    friendListViewModel.Email = this.Email;
+                                    friendListViewModel.PhoneNumber = this.PhoneNumber;
+                                    friendListViewModel.Remark = this.Remark;
+                                    //关闭窗口
+                                    window.Close();
+                                }
+                                    
+                            });
                 return btRegister;
-            }
-        }
-
-        
-        private MyCommand btChooseJpj;
-        public MyCommand BtChooseJpj
-        {
-            get
-            {
-                if (btChooseJpj == null)
-                    btChooseJpj = new MyCommand(
-                        new Action<object>(
-                            o =>
-                            {
-                                Winform.OpenFileDialog openFileDialog = new Winform.OpenFileDialog();
-                                openFileDialog.ShowDialog();
-
-                                MessageBox.Show(openFileDialog.FileName);
-                         
-                            }));
-                return btChooseJpj;
-            }
-        }
-
-        private MyCommand<PasswordBox> pbPassword;
-        public MyCommand<PasswordBox> PbPassword
-        {
-            get
-            {
-                if (pbPassword == null)
-                    pbPassword = new MyCommand<PasswordBox>(
-                            password =>
-                            {
-                                //拿到密码框密码
-                                this.PassWord = password.Password;
-                            });
-                return pbPassword;
-            }
-        }
-
-        private MyCommand<PasswordBox> pbSPassword;
-        public MyCommand<PasswordBox> PbSPassword
-        {
-            get
-            {
-                if (pbSPassword == null)
-                    pbSPassword = new MyCommand<PasswordBox>(
-                            password =>
-                            {
-                                //拿到确认密码框密码
-                                this.sPassWord = password.Password;
-                            });
-                return pbSPassword;
             }
         }
 
@@ -324,7 +257,7 @@ namespace MISMC.ViewModel
             }
         }
 
-        
+
 
         private MyCommand btMaleSexRadio;
         public MyCommand BtMaleSexRadio
@@ -361,9 +294,6 @@ namespace MISMC.ViewModel
         public void Resset()
         {
             //重置所有框中的文本
-            UserName = "";
-            PassWord = "";
-            sPassWord = "";
             RealName = "";
             Sex = "";
             BirthDay = "";
@@ -372,9 +302,6 @@ namespace MISMC.ViewModel
             PhoneNumber = "";
             Remark = "";
 
-            boUserName = false;
-            boPassWord = false;
-            boSPassWord = false;
             boRealName = false;
             boSex = false;
             boBirthDay = false;
@@ -396,9 +323,6 @@ namespace MISMC.ViewModel
                             o =>
                             {
                                 //重置所有框中的文本
-                                UserName = "";
-                                PassWord = "";
-                                sPassWord = "";
                                 RealName = "";
                                 Sex = "";
                                 BirthDay = "";
@@ -407,9 +331,6 @@ namespace MISMC.ViewModel
                                 PhoneNumber = "";
                                 Remark = "";
 
-                                boUserName = false;
-                                boPassWord = false;
-                                boSPassWord = false;
                                 boRealName = false;
                                 boSex = false;
                                 boBirthDay = false;
@@ -419,103 +340,6 @@ namespace MISMC.ViewModel
                                 boRemark = false;
                             }));
                 return btResetting;
-            }
-        }
-
-        private MyCommand<TextBlock> tbUserName;
-        public MyCommand<TextBlock> TbUserName
-        {
-            get
-            {
-                if (tbUserName == null)
-                    tbUserName = new MyCommand<TextBlock>(
-                            para =>
-                            {
-                                String splist = "";
-                                para.Inlines.Clear();
-                                //确认UserName
-                                if (Encoding.Default.GetByteCount(UserName) < 6)
-                                {
-                                    boUserName = false;
-                                    //MessageBox.Show(UserName);
-                                    splist = "用户名长度在6-20字节之间";
-                                }
-                                else if (Encoding.Default.GetByteCount(UserName) > 20)
-                                {
-                                    boUserName = false;
-                                    splist = "用户名长度在6-20字节之间";
-                                }
-                                else
-                                {
-                                    boUserName = true;
-                                    splist = "";
-                                }
-                                para.Inlines.Add(new Run(splist) { Foreground = Brushes.Red });
-                                this.RigistButtonCheck();
-                            });
-                return tbUserName;
-            }
-        }
-
-        private MyCommand<TextBlock> tbPassWord;
-        public MyCommand<TextBlock> TbPassWord
-        {
-            get
-            {
-                if (tbPassWord == null)
-                    tbPassWord = new MyCommand<TextBlock>(
-                            para =>
-                            {
-                                Regex regex = new Regex(@"^[a-zA-Z]\w{5,19}$");
-                                bool isOK = regex.IsMatch(PassWord);
-                                String splist = "";
-                                para.Inlines.Clear();
-
-                                if (!isOK)
-                                {
-                                    boPassWord = false;
-                                    splist = "以字母开头，长度在6-20之间";
-                                }
-                                else 
-                                {
-                                    boPassWord = true;
-                                    splist = "";
-                                }
-                                para.Inlines.Add(new Run(splist) { Foreground = Brushes.Red });
-                                this.RigistButtonCheck();
-                            });
-                return tbPassWord;
-            }
-        }
-
-        private MyCommand<TextBlock> tbSPassWord;
-        public MyCommand<TextBlock> TbSPassWord
-        {
-            get
-            {
-                if (tbSPassWord == null)
-                    tbSPassWord = new MyCommand<TextBlock>(
-                            para =>
-                            {
-                               
-                                String splist = "";
-                                para.Inlines.Clear();
-
-                                if (!PassWord.Equals(sPassWord))
-                                {
-                                    boSPassWord = false;
-                                    //MessageBox.Show(PassWord + "--" + sPassWord);
-                                    splist = "密码不一致";
-                                }
-                                else
-                                {
-                                    boSPassWord = true;
-                                    splist = "";
-                                }
-                                para.Inlines.Add(new Run(splist) { Foreground = Brushes.Red });
-                                this.RigistButtonCheck();
-                            });
-                return tbSPassWord;
             }
         }
 
@@ -634,7 +458,7 @@ namespace MISMC.ViewModel
 
                                 String splist = "";
                                 para.Inlines.Clear();
-                                
+
                                 if (!isOK)
                                 {
                                     boPhoneNumber = false;

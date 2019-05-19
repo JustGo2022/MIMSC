@@ -320,6 +320,22 @@ namespace MISMC.Model
                     qLiteCommand.ExecuteNonQuery();
                 }
 
+                String tablename = "F" + id + "message";
+
+                //这个好友的表存不存在
+                qLiteCommand.CommandText = "SELECT COUNT(*) FROM sqlite_master where type = 'table' and name = @table";
+                qLiteCommand.Parameters.AddWithValue("@table", tablename);
+
+                if (0 == Convert.ToInt32(qLiteCommand.ExecuteScalar()))
+                {
+                    Console.WriteLine(tablename + "表不存在，那么创建它");
+                    qLiteCommand.CommandText = "create table " + tablename + "( friendid INT NOT NULL,"
+                                                                              + " message varchar(255) NOT NULL, "
+                                                                              + " messagedate datatime NOT NULL, "
+                                                                              + " type int(2) NOT NULL "
+                                                                              + ")";
+                    qLiteCommand.ExecuteNonQuery();
+                }
 
             }
             catch (Exception ex)
@@ -568,6 +584,62 @@ namespace MISMC.Model
                     message = new MessageMix();
                     //将数据插入到最前面，因为在查询是是按日期从大到小排的，而日期小的应该在前面
                     messageMixGroup.Insert(messcount, message);
+                    //获得好友信息
+                    message.FriendId = sqlitreader[0].ToString();
+                    message.Message = sqlitreader[1].ToString();
+                    message.MessageDate = sqlitreader[2].ToString();
+                    message.FriendName = FriendName;
+                    message.UserName = Username;
+                    if (int.Parse(sqlitreader[3].ToString()) == 0)
+                    {
+                        //好友发过来的消息
+                        message.Type = "Left";
+                    }
+                    else
+                    {
+                        //自己发给好友的消息
+                        message.Type = "Right";
+                    }
+
+
+                }
+                sqlitreader.Close();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("SaveFriendInfo Error : " + ex);
+            }
+            sQLiteConnection.Close();
+            Console.WriteLine("好友信息查询结束");
+        }
+
+        //查询对应好友过去的消息
+        public static void QueryMessageOld(String Username, String FriendName, String Id, ref ObservableCollection<MessageMix> messageMixGroup)
+        {
+            Console.WriteLine(Id + "聊天消息查询开始");
+            //该好友对应的消息表的表名字
+            String table = "F" + Id + "message";
+            //先获得一个数据库连接
+            SQLiteConnection sQLiteConnection = SqliteConnect.GetSqliteConnect();
+            sQLiteConnection.Open();
+            try
+            {
+                SQLiteCommand qLiteCommand = sQLiteConnection.CreateCommand();
+
+                    //获取前面的数据
+                qLiteCommand.CommandText = "select * from " + table + "  where messagedate < @messagedate order by messagedate desc limit 30";
+                qLiteCommand.Parameters.AddWithValue("@messagedate", messageMixGroup.First().MessageDate);
+                //获得查询结果集
+                SQLiteDataReader sqlitreader = qLiteCommand.ExecuteReader();
+
+                int messcount = messageMixGroup.Count;
+
+                MessageMix message = null;
+                while (sqlitreader.Read())
+                {
+                    message = new MessageMix();
+                    //将数据插入到最前面，因为在查询是是按日期从大到小排的，而日期小的应该在前面
+                    messageMixGroup.Insert(0, message);
                     //获得好友信息
                     message.FriendId = sqlitreader[0].ToString();
                     message.Message = sqlitreader[1].ToString();

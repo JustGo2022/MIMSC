@@ -42,6 +42,7 @@
     <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>packages\EntityFramework.6.2.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.Expression.Interactions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -80,6 +81,8 @@
     <Compile Include="Model\SqliteConnect.cs" />
     <Compile Include="Model\UserInfo.cs" />
     <Compile Include="ViewModel\AddFriendViewModel.cs" />
+    <Compile Include="ViewModel\ChangePassWordViewModel.cs" />
+    <Compile Include="ViewModel\ChangeUserInfoViewModel.cs" />
     <Compile Include="ViewModel\ChangGroupViewModel.cs" />
     <Compile Include="ViewModel\ChatViewModel.cs" />
     <Compile Include="ViewModel\FriendInfoViewModel.cs" />
@@ -91,6 +94,12 @@
     </Compile>
     <Compile Include="Windows\ChangeGroupWindow.xaml.cs">
       <DependentUpon>ChangeGroupWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\ChangePassWordWindow.xaml.cs">
+      <DependentUpon>ChangePassWordWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\ChangeUserInfoWindow.xaml.cs">
+      <DependentUpon>ChangeUserInfoWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Windows\ChatWindow.xaml.cs">
       <DependentUpon>ChatWindow.xaml</DependentUpon>
@@ -121,6 +130,14 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Windows\ChangeGroupWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\ChangePassWordWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\ChangeUserInfoWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

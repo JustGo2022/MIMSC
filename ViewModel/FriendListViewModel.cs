@@ -282,6 +282,63 @@ namespace MISMC.ViewModel
                 return btAddFriend;
             }
         }
+
+        private MyCommand btUserInfo;
+        public MyCommand BtUserInfo
+        {
+            get
+            {
+                if (btUserInfo == null)
+                    btUserInfo = new MyCommand(
+                        new Action<object>(
+                            o =>
+                            {
+                                FriendInfoWindow friendInfoWindow = new FriendInfoWindow();
+                                FriendInfoViewModel friendInfoViewModel = (FriendInfoViewModel)friendInfoWindow.DataContext;
+                                friendInfoViewModel.FriendInfoSet(this.UserName, this.RealName, this.Sex, this.BirthDay, this.Address, this.Email, this.PhoneNumber, this.Remark);
+                                friendInfoWindow.Show();
+                            }));
+                return btUserInfo;
+            }
+        }
+
+        private MyCommand btModeMessage;
+        public MyCommand BtModeMessage
+        {
+            get
+            {
+                if (btModeMessage == null)
+                    btModeMessage = new MyCommand(
+                        new Action<object>(
+                            o =>
+                            {
+                                ChangeUserInfoWindow changeUserInfoWindow = new ChangeUserInfoWindow();
+                                ChangeUserInfoViewModel changeUserInfoViewModel = (ChangeUserInfoViewModel)changeUserInfoWindow.DataContext;
+                                changeUserInfoViewModel.SetInfo(this.RealName, this.Sex, this.Address, this.Email, this.PhoneNumber, this.Remark);
+                                changeUserInfoWindow.Show();
+                            }));
+                return btModeMessage;
+            }
+        }
+
+        private MyCommand btModePassWord;
+        public MyCommand BtModePassWord
+        {
+            get
+            {
+                if (btModePassWord == null)
+                    btModePassWord = new MyCommand(
+                        new Action<object>(
+                            o =>
+                            {
+                                ChangePassWordWindow changePassWordWindow = new ChangePassWordWindow();
+                                changePassWordWindow.Show();
+                            }));
+                return btModePassWord;
+            }
+        }
+
+        
     }
 
 
