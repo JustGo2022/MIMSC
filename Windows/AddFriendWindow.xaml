@@ -7,8 +7,190 @@
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         xmlns:c1="clr-namespace:MyMVVM"
         mc:Ignorable="d"
-        Title="AddFriendWindow" Height="200" Width="400">
-    <Grid>
+        Title="添加好友" Height="200" Width="300" AllowsTransparency="True" WindowStyle="None"
+        Background="AliceBlue"
+        WindowStartupLocation="CenterScreen">
+
+    <Window.Resources>
+        <Style x:Key="txtTest"  TargetType="{x:Type TextBox}">
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Grid x:Name="Grid">
+                            <Border x:Name="Border" SnapsToDevicePixels="True"
+                                CornerRadius="1"
+                                BorderBrush="LightGray" BorderThickness="2" Background="White" />
+                            <ScrollViewer x:Name="PART_ContentHost" BorderThickness="0"
+IsTabStop="False" Margin="2" VerticalAlignment="Stretch"  />
+
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Border" Property="BorderBrush" Value="Blue"/>
+                                <Setter TargetName="Border" Property="Opacity" Value="0.2"/>
+                            </Trigger>
+
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter TargetName="Border" Property="BorderBrush" Value="Blue"/>
+                                <Setter TargetName="Border" Property="Opacity" Value="0.5"/>
+                            </Trigger>
+
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Grid" Property="Opacity" Value="0.2" />
+                            </Trigger>
+
+                            <Trigger Property="IsReadOnly" Value="True">
+                                <Setter TargetName="Grid" Property="IsEnabled" Value="False" />
+                                <Setter TargetName="Border" Property="Opacity" Value="0.2" />
+                                <Setter TargetName="PART_ContentHost" Property="Opacity" Value="0.5" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="TextBoxStyle1" BasedOn="{x:Null}" TargetType="{x:Type TextBox}">
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+            <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="1"/>
+            <Setter Property="AllowDrop" Value="true"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="ScrollViewer.PanningMode" Value="VerticalFirst"/>
+            <Setter Property="Stylus.IsFlicksEnabled" Value="False"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type TextBox}">
+                        <Border x:Name="Bd" SnapsToDevicePixels="true" BorderBrush="#FFDDDDDD" BorderThickness="1" ClipToBounds="False" CornerRadius="5">
+                            <Border.Effect>
+                                <DropShadowEffect Color="White" Direction="0" ShadowDepth="0" BlurRadius="10"/>
+                            </Border.Effect>
+                            <!--这个Border主要用来遮挡框内的阴影，只要外阴影，如果只要内阴影不要外阴影，那么设置border的 ClipToBounds="True"  剪切外部内容，即可实现内阴影-->
+                            <Border Background="White" CornerRadius="5">
+                                <ScrollViewer x:Name="PART_ContentHost" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="{x:Null}">
+                                </ScrollViewer>
+                            </Border>
+                        </Border>
+                        <ControlTemplate.Triggers>
+
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="BorderBrush" TargetName="Bd" Value="#FF66AFE9"/>
+                            </Trigger>
+
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter Property="Effect" TargetName="Bd">
+                                    <Setter.Value>
+                                        <DropShadowEffect BlurRadius="10" Color="#FFE5F2FC" Direction="0" ShadowDepth="0"/>
+                                    </Setter.Value>
+                                </Setter>
+                                <Setter Property="BorderBrush" TargetName="Bd" Value="#FF66AFE9"/>
+                            </Trigger>
+
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="PasswordBoxStyle1" BasedOn="{x:Null}" TargetType="{x:Type PasswordBox}">
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+            <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="1"/>
+            <Setter Property="AllowDrop" Value="true"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="ScrollViewer.PanningMode" Value="VerticalFirst"/>
+            <Setter Property="Stylus.IsFlicksEnabled" Value="False"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type PasswordBox}">
+                        <Border x:Name="Bd" SnapsToDevicePixels="true" BorderBrush="#FFDDDDDD" BorderThickness="1" ClipToBounds="False" CornerRadius="5">
+                            <Border.Effect>
+                                <DropShadowEffect Color="White" Direction="0" ShadowDepth="0" BlurRadius="10"/>
+                            </Border.Effect>
+                            <!--这个Border主要用来遮挡框内的阴影，只要外阴影，如果只要内阴影不要外阴影，那么设置border的 ClipToBounds="True"  剪切外部内容，即可实现内阴影-->
+                            <Border Background="White" CornerRadius="5">
+                                <ScrollViewer x:Name="PART_ContentHost" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="{x:Null}">
+                                </ScrollViewer>
+                            </Border>
+                        </Border>
+                        <ControlTemplate.Triggers>
+
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="BorderBrush" TargetName="Bd" Value="#FF66AFE9"/>
+                            </Trigger>
+
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter Property="Effect" TargetName="Bd">
+                                    <Setter.Value>
+                                        <DropShadowEffect BlurRadius="10" Color="#FFE5F2FC" Direction="0" ShadowDepth="0"/>
+                                    </Setter.Value>
+                                </Setter>
+                                <Setter Property="BorderBrush" TargetName="Bd" Value="#FF66AFE9"/>
+                            </Trigger>
+
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="TextBlockStyle1" BasedOn="{x:Null}" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="Background" Value="Aquamarine"/>
+            <Setter Property="Padding" Value="1"/>
+            <Setter Property="AllowDrop" Value="true"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="ScrollViewer.PanningMode" Value="VerticalFirst"/>
+            <Setter Property="Stylus.IsFlicksEnabled" Value="False"/>
+
+        </Style>
+
+        <Style x:Key="FilletButton" TargetType="{x:Type Button}" >
+            <Setter Property="Background" Value="AliceBlue"></Setter>
+            <Setter Property="Foreground" Value="Black"></Setter>
+            <Setter Property="BorderBrush" Value="Aqua"></Setter>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border x:Name="border" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" 
+                                SnapsToDevicePixels="true" CornerRadius="6,6,6,6">
+                            <ContentPresenter x:Name="contentPresenter" 
+                                              Focusable="False" 
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
+                                              Margin="{TemplateBinding Padding}" 
+                                              RecognizesAccessKey="True" 
+                                              SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"  />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="true">
+                                <Setter Property="Background" TargetName="border" Value="SpringGreen"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </Window.Resources>
+
+    <StackPanel>
+    <DockPanel  Height="25" MouseMove="TitleBar_MouseMove" MouseDown="TitleBar_MouseDown" Background="#4C9CFB" DockPanel.Dock="Top">
+        <TextBlock Name="txtTitle" Margin="1,0,0,0"  Padding="5,3,2,3" Text="添加好友" 
+                   HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="14" FontFamily="微软雅黑"  
+                   Foreground="White"/>
+        <StackPanel Width="auto" HorizontalAlignment="Right" Orientation="Horizontal">
+            <Button HorizontalAlignment="Right" Width="25" Foreground="White" Background="#4C9CFB" x:Name="btn_min" Content="-"  
+                             Click="btn_min_Click" Grid.Column="0"/>
+            <Button HorizontalAlignment="Right" Width="25" Foreground="White" Background="#4C9CFB" x:Name="btn_close"  Content="×"  
+                             Click="btn_close_Click" Grid.Column="0"/>
+        </StackPanel>
+    </DockPanel>
+    <Grid Margin="20" Height="127">
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"></RowDefinition>
             <RowDefinition></RowDefinition>
@@ -18,8 +200,8 @@
                 <ColumnDefinition ></ColumnDefinition>
                 <ColumnDefinition Width="auto"></ColumnDefinition>
             </Grid.ColumnDefinitions>
-            <TextBox Grid.Column="0" Text="{Binding SearchString}"></TextBox>
-            <Button Content="Search" Grid.Column="1">
+            <TextBox HorizontalAlignment="Left" Width="250" Style="{StaticResource TextBoxStyle1}" Grid.Column="0" Text="{Binding SearchString}"></TextBox>
+            <Button Width="70" Style="{StaticResource FilletButton}" Content="搜索" Grid.Column="1">
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="Click">
                         <c1:MyEventCommand Command="{Binding  BtSearchFriend}"/>
@@ -28,7 +210,7 @@
             </Button>
             </Grid>
         <ScrollViewer Name="scroll" VerticalScrollBarVisibility="Visible" Grid.Row="1"  >
-            <ItemsControl x:Name="itcl" ItemsSource="{Binding FrienInfoGroup}">
+            <ItemsControl  x:Name="itcl" ItemsSource="{Binding FrienInfoGroup}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <StackPanel></StackPanel>
@@ -36,16 +218,16 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <StackPanel Orientation="Horizontal">
-                            <Label Content="{Binding FriendName}"></Label>
-                            <Button Content="添加">
+                        <DockPanel Margin="5">
+                                <Label DockPanel.Dock="Left" Background="#B2D7DD" Content="{Binding FriendName}"></Label>
+                            <Button HorizontalAlignment="Right" DockPanel.Dock="Right" Style="{StaticResource FilletButton}" Width="50" Content="添加">
                                 <i:Interaction.Triggers>
                                     <i:EventTrigger EventName="Click">
                                         <c1:MyEventCommand Command="{Binding  BtAdd}"/>
                                     </i:EventTrigger>
                                 </i:Interaction.Triggers>
                             </Button>
-                        </StackPanel>
+                        </DockPanel>
                         <DataTemplate.Triggers>
     
                         </DataTemplate.Triggers>
@@ -54,4 +236,5 @@
             </ItemsControl>
         </ScrollViewer>
     </Grid>
+    </StackPanel>
 </Window>

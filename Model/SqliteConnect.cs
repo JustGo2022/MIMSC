@@ -88,8 +88,9 @@ namespace MISMC.Model
                                                                               + " address varchar(50) NOT NULL, "
                                                                               + " email varchar(50) NOT NULL, "
                                                                               + " phonenumber varchar(11) NOT NULL, "
-                                                                              + " remarks varchar(255) NOT NULL "
-                                                                              + ")";
+                                                                              + " remarks varchar(255) NOT NULL,"
+                                                                              + " updatetime date NOT NULL"
+                                                                              + " )";
                     qLiteCommand.ExecuteNonQuery();
                 }
 
@@ -156,7 +157,7 @@ namespace MISMC.Model
                 {
                     Console.WriteLine("更新了用户信息");
                     //如果信息存在，那么就更新
-                    qLiteCommand.CommandText = "update userinformation set username = @username,realname = @realname,sex = @sex,birthday = @birthday,address = @address,email = @email,phonenumber = @phonenumber,remarks = @remarks " +
+                    qLiteCommand.CommandText = "update userinformation set username = @username,realname = @realname,sex = @sex,birthday = @birthday,address = @address,email = @email,phonenumber = @phonenumber,remarks = @remarks  " +
                                                 "where id = @id";
                     qLiteCommand.Parameters.AddWithValue("@id", id);
                     qLiteCommand.Parameters.AddWithValue("@username", username);
@@ -169,6 +170,7 @@ namespace MISMC.Model
                     qLiteCommand.Parameters.AddWithValue("@remarks", reamarks);
                     qLiteCommand.ExecuteNonQuery();
                 }
+
             }
             catch (Exception ex)
             {
@@ -262,7 +264,7 @@ namespace MISMC.Model
             sQLiteConnection.Close();
         }
 
-        //保存好友的详细信息
+        //保存好友的详细信息，这里应该要加一个机制，可以删除服务端好友表中已经没有了的好友
         public static void SaveFriendInfo(String id, String friendgroup, String username, String realname, String sex, String birthday, String address, String email, String phonenumber, String reamarks)
         {
             //先获得一个数据库连接
@@ -270,7 +272,6 @@ namespace MISMC.Model
             sQLiteConnection.Open();
             try
             {
-
                 SQLiteCommand qLiteCommand = sQLiteConnection.CreateCommand();
 
                 qLiteCommand.CommandText = "SELECT COUNT(*) FROM friendinformation where id = @id";
@@ -284,8 +285,8 @@ namespace MISMC.Model
                 {
                     Console.WriteLine("插入了好友信息");
                     //如果不存在该好友的详细信息，就插入
-                    qLiteCommand.CommandText = "insert into friendinformation (id,friendgroup,username,realname,sex,birthday,address,email,phonenumber,remarks) " +
-                                           "values(@friendid,@friendgroup,@username,@realname,@sex,@birthday,@address,@email,@phonenumber,@remarks)";
+                    qLiteCommand.CommandText = "insert into friendinformation (id,friendgroup,username,realname,sex,birthday,address,email,phonenumber,remarks,updatetime) " +
+                                           "values(@friendid,@friendgroup,@username,@realname,@sex,@birthday,@address,@email,@phonenumber,@remarks,@update)";
                     qLiteCommand.Parameters.AddWithValue("@friendid", id);
                     qLiteCommand.Parameters.AddWithValue("@friendgroup", friendgroup);
                     qLiteCommand.Parameters.AddWithValue("@username", username);
@@ -296,13 +297,14 @@ namespace MISMC.Model
                     qLiteCommand.Parameters.AddWithValue("@email", email);
                     qLiteCommand.Parameters.AddWithValue("@phonenumber", phonenumber);
                     qLiteCommand.Parameters.AddWithValue("@remarks", reamarks);
+                    qLiteCommand.Parameters.AddWithValue("@update", DateTime.Now.ToString());
                     qLiteCommand.ExecuteNonQuery();
                 }
                 else
                 {
                     Console.WriteLine("更新了好友信息");
                     //如果存在，就更新
-                    qLiteCommand.CommandText = "update friendinformation set friendgroup = @friendgroup, username = @username,realname = @realname,sex = @sex,birthday = @birthday,address = @address,email = @email,phonenumber = @phonenumber,remarks = @remarks " +
+                    qLiteCommand.CommandText = "update friendinformation set friendgroup = @friendgroup, username = @username,realname = @realname,sex = @sex,birthday = @birthday,address = @address,email = @email,phonenumber = @phonenumber,remarks = @remarks ,updatetime = @update" +
                                                 "where id = @friendid";
                     qLiteCommand.Parameters.AddWithValue("@friendid", id);
                     qLiteCommand.Parameters.AddWithValue("@friendgroup", friendgroup);
@@ -314,6 +316,7 @@ namespace MISMC.Model
                     qLiteCommand.Parameters.AddWithValue("@email", email);
                     qLiteCommand.Parameters.AddWithValue("@phonenumber", phonenumber);
                     qLiteCommand.Parameters.AddWithValue("@remarks", reamarks);
+                    qLiteCommand.Parameters.AddWithValue("@update", DateTime.Now.ToString());
                     qLiteCommand.ExecuteNonQuery();
                 }
 
@@ -415,8 +418,7 @@ namespace MISMC.Model
 
         //查询所有好友的详细信息
         public static void QueryFriendInfo(ref ObservableCollection<FriendGroup> friendCollection)
-        {
-            //先获得一个数据库连接
+        {            //先获得一个数据库连接
             Console.WriteLine("好友信息查询开始");
             SQLiteConnection sQLiteConnection = SqliteConnect.GetSqliteConnect();
             sQLiteConnection.Open();
@@ -448,6 +450,7 @@ namespace MISMC.Model
                     friendgroup = FriendGroup.InGroupListAdd(ref friendCollection, sqlitreader[1].ToString());
 
                     //检查好友List中有没有此好友，有这个好友，返回这个好友。没有，那么新建好友，返回新建的好友
+                    //这个里面还要加一层检测
                     friendEntity = FriendEntity.InGroupAdd(ref friendgroup, sqlitreader[2].ToString());
                     //获得好友信息
                     friendEntity.Id = sqlitreader[0].ToString();
@@ -621,6 +624,48 @@ namespace MISMC.Model
             }
             sQLiteConnection.Close();
 
+        }
+
+        //根据数据更新时间删除好友
+        public static void DeleteFriendByTime(String DateTime)
+        {
+            //先获得一个数据库连接
+            SQLiteConnection sQLiteConnection = SqliteConnect.GetSqliteConnect();
+            sQLiteConnection.Open();
+            try
+            {
+                SQLiteCommand qLiteCommand = sQLiteConnection.CreateCommand();
+
+                qLiteCommand.CommandText = "delete * FROM friendinformation where updatetime < @time";
+                qLiteCommand.Parameters.AddWithValue("@time", DateTime);
+                qLiteCommand.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("DeleteFriendByTime Error : " + ex);
+            }
+            sQLiteConnection.Close();
+        }
+
+        //根据id之间删除对应好友
+        public static void DeleteFriendById(String Id)
+        {
+            //先获得一个数据库连接
+            SQLiteConnection sQLiteConnection = SqliteConnect.GetSqliteConnect();
+            sQLiteConnection.Open();
+            try
+            {
+                SQLiteCommand qLiteCommand = sQLiteConnection.CreateCommand();
+
+                qLiteCommand.CommandText = "delete FROM friendinformation where id = @id";
+                qLiteCommand.Parameters.AddWithValue("@id", Id);
+                qLiteCommand.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("DeleteFriendById Error : " + ex);
+            }
+            sQLiteConnection.Close();
         }
     }
 }

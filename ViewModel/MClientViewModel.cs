@@ -6,7 +6,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows.Controls;
+using System.Windows.Documents;
+using System.Windows.Media;
 
 namespace MISMC.ViewModel 
 {
@@ -14,6 +18,11 @@ namespace MISMC.ViewModel
     {
         private MClientViewModel()
         {
+            boUserName = false;
+            boPassWord = false;
+            UserName = "";
+            PassWord = "";
+            isLand = "false";
             Mclient = MClient.CreateInstance("127.0.0.1", "5730");
             Mclient.ConnectServer();
         }
@@ -32,6 +41,21 @@ namespace MISMC.ViewModel
 
         //注册窗口实例
         public RegisterWindow registerWindow { get; set; }
+
+        bool boUserName;
+        bool boPassWord;
+
+        public void LandButtonCheck()
+        {
+            if (boUserName && boPassWord)
+            {
+                isLand = "true";
+            }
+            else
+            {
+                isLand = "false";
+            }
+        }
 
         private MClient mclient;
         public MClient Mclient
@@ -61,16 +85,30 @@ namespace MISMC.ViewModel
             }
         }
 
-        private String userPass;
-        public String UserPass
+        private String passWord;
+        public String PassWord
         {
-            get { return userPass; }
+            get { return passWord; }
             set
             {
-                if (userPass != value)
+                if (passWord != value)
                 {
-                    userPass = value;
-                    RaisePropertyChanged("UserPass");
+                    passWord = value;
+                    RaisePropertyChanged("PassWord");
+                }
+            }
+        }
+
+        private String island;
+        public String isLand
+        {
+            get { return island; }
+            set
+            {
+                if (island != value)
+                {
+                    island = value;
+                    RaisePropertyChanged("isLand");
                 }
             }
         }
@@ -82,12 +120,11 @@ namespace MISMC.ViewModel
             {
                 if (btLogin == null)
                     btLogin = new MyCommand(
-                        new Action<object>(
-                            o =>
+                            password =>
                             {
                                 //发送用户名和密码
-                                Mclient.SendLogin(UserName, UserPass);
-                            }));
+                                Mclient.SendLogin(UserName, PassWord);
+                            });
                 return btLogin;
             }
         }
@@ -115,5 +152,87 @@ namespace MISMC.ViewModel
             }
         }
 
+        private MyCommand<PasswordBox> pbPassword;
+        public MyCommand<PasswordBox> PbPassword
+        {
+            get
+            {
+                if (pbPassword == null)
+                    pbPassword = new MyCommand<PasswordBox>(
+                            password =>
+                            {
+                                //拿到密码框密码
+                                this.PassWord = password.Password;
+                            });
+                return pbPassword;
+            }
+        }
+
+        private MyCommand<TextBlock> tbUserName;
+        public MyCommand<TextBlock> TbUserName
+        {
+            get
+            {
+                if (tbUserName == null)
+                    tbUserName = new MyCommand<TextBlock>(
+                            para =>
+                            {
+                                String splist = "";
+                                para.Inlines.Clear();
+                                //确认UserName
+                                if (Encoding.Default.GetByteCount(UserName) < 6)
+                                {
+                                    boUserName = false;
+                                    //MessageBox.Show(UserName);
+                                    splist = "长度为6-20字节";
+                                }
+                                else if (Encoding.Default.GetByteCount(UserName) > 20)
+                                {
+                                    boUserName = false;
+                                    splist = "长度为6-20字节";
+                                }
+                                else
+                                {
+                                    boUserName = true;
+                                    splist = "";
+                                }
+                                para.Inlines.Add(new Run(splist) { Foreground = Brushes.Red });
+                                this.LandButtonCheck();
+                            });
+                return tbUserName;
+            }
+
+        }
+
+        private MyCommand<TextBlock> tbPassWord;
+        public MyCommand<TextBlock> TbPassWord
+        {
+            get
+            {
+                if (tbPassWord == null)
+                    tbPassWord = new MyCommand<TextBlock>(
+                            para =>
+                            {
+                                Regex regex = new Regex(@"^[a-zA-Z]\w{5,19}$");
+                                bool isOK = regex.IsMatch(PassWord);
+                                String splist = "";
+                                para.Inlines.Clear();
+
+                                if (!isOK)
+                                {
+                                    boPassWord = false;
+                                    splist = "字母开头，长度为6-20字节";
+                                }
+                                else
+                                {
+                                    boPassWord = true;
+                                    splist = "";
+                                }
+                                para.Inlines.Add(new Run(splist) { Foreground = Brushes.Red });
+                                this.LandButtonCheck();
+                            });
+                return tbPassWord;
+            }
+        }
     }
 }

@@ -16,14 +16,14 @@ using System.Windows.Shapes;
 namespace MISMC.Windows
 {
     /// <summary>
-    /// RegisterWindow.xaml 的交互逻辑
+    /// ChangeGroupWindow.xaml 的交互逻辑
     /// </summary>
-    public partial class RegisterWindow : Window
+    public partial class ChangeGroupWindow : Window
     {
-        public RegisterWindow()
+        public ChangeGroupWindow()
         {
             InitializeComponent();
-            this.DataContext = RegisterViewModel.CreateInstance();
+            this.DataContext = new ChangGroupViewModel();
         }
 
         #region 标题栏事件

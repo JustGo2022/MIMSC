@@ -23,7 +23,9 @@ namespace SocketAsyncEventArgsOfficeDemo
             FriendInfo = 4,
             friendrequestMessage = 10,
             UserMessage = 5,
-            AddFriendRetMessage = 8
+            AddFriendRetMessage = 8,
+            ChangeGroupMessage = 13,
+            DeleteFriendMessage = 15
         }
 
         public static void ReceiveDeal(SocketAsyncEventArgs e)
@@ -138,6 +140,16 @@ namespace SocketAsyncEventArgsOfficeDemo
                     AddFriendRetMessage(e);
                     break;
 
+                case messageType.ChangeGroupMessage:
+                    Console.WriteLine("返回的模糊搜索到的用户信息处理");
+                    ChangeGroupMessage(e);
+                    break;
+
+                case messageType.DeleteFriendMessage:
+                    Console.WriteLine("返回的删除好友信息处理");
+                    DeleteFriendMessage(e);
+                    break;
+
                 default:
                     //可能的处理
                     break;
@@ -168,7 +180,7 @@ namespace SocketAsyncEventArgsOfficeDemo
             {
                 MessageBox.Show("登陆失败");
                 MClientViewModel mClientViewModel = MClientViewModel.CreateInstance();
-                mClientViewModel.UserPass = "";
+                mClientViewModel.PassWord = "";
             }
 
 
@@ -191,8 +203,13 @@ namespace SocketAsyncEventArgsOfficeDemo
                 MessageBox.Show("注册成功");
                 //关闭注册窗口
                 MClientViewModel mClientViewModel = MClientViewModel.CreateInstance();
+                RegisterViewModel registerViewModel = RegisterViewModel.CreateInstance();
+                //重置输入框
+                registerViewModel.Resset();
                 //跨线程调用窗体组件的方法，使注册窗口关闭
-                mClientViewModel.registerWindow.Dispatcher.Invoke(new Action(() => { mClientViewModel.registerWindow.Close(); }));
+                mClientViewModel.registerWindow.Dispatcher.Invoke(new Action(() => {
+                    mClientViewModel.registerWindow.Close();
+                }));
 
             }
             else
@@ -260,6 +277,48 @@ namespace SocketAsyncEventArgsOfficeDemo
             //得到用户名和密码
             JArray jArray = JArray.Parse(jsonStr);
 
+
+            if (jArray[0]["isOk"].ToString().Equals("True"))
+            {
+     
+                Console.WriteLine("保存好友信息");
+
+                //保存还没有更新前的时间，如果时间比这个时间还晚，说明是已经被删除的好友
+                String updatetime = DateTime.Now.ToString();
+
+                foreach (var obj in jArray)
+                {
+                   
+                    SqliteConnect.SaveFriendInfo(obj["id"].ToString(), obj["Group"].ToString(), obj["UserName"].ToString(), obj["RealName"].ToString(), obj["Sex"].ToString(),
+                                            obj["BirthDay"].ToString(), obj["Address"].ToString(), obj["Email"].ToString(), obj["PhoneNumber"].ToString(),
+                                            obj["Remarks"].ToString());
+                }
+
+                //在保存完好友信息后，就要根据更新时间对数据库表中的数据进行排查，删除掉这一次还没有更新的数据
+                SqliteConnect.DeleteFriendByTime(updatetime);
+            }
+            else
+            {
+                //如果不进行这个补充，那么在只有一个好友，且服务端已经删除这个好友的情况下，客户端本地的该好友不会被删除
+                String updatetime = DateTime.Now.ToString();
+                SqliteConnect.DeleteFriendByTime(updatetime);
+            }
+        }
+
+        public static void ChangeGroupMessage(SocketAsyncEventArgs e)
+        {
+            MClient mClient = MClient.CreateInstance();
+            AsyncUserToken token = (AsyncUserToken)e.UserToken;
+            //得到一个完整的包的数据，放入新list,第二个参数是数据长度，所以要减去8  
+            List<byte> onePackage = token.receiveBuffer.GetRange(8, token.packageLen - 8);
+            //将复制出来的数据从receiveBuffer旧list中删除
+            token.receiveBuffer.RemoveRange(0, token.packageLen);
+            //list要先转换成数组，再转换成字符串
+            String jsonStr = Encoding.Default.GetString(onePackage.ToArray());
+            //得到用户名和密码
+            JArray jArray = JArray.Parse(jsonStr);
+
+            //先保存好友信息
             if (jArray[0]["isOk"].ToString().Equals("True"))
             {
                 Console.WriteLine("保存好友信息");
@@ -271,6 +330,14 @@ namespace SocketAsyncEventArgsOfficeDemo
                                             obj["Remarks"].ToString());
                 }
             }
+            //然后删除原分组List中的好友
+            Application.Current.Dispatcher.Invoke(
+                new Action(() =>
+                {
+                    FriendListViewModel friendListViewModel = FriendListViewModel.CreateInstance();
+                    FriendEntity.InGroupListDelete(friendListViewModel.friendGroups, jArray[0]["id"].ToString());
+                })
+                );
         }
 
         public static void UserMessageDeal(SocketAsyncEventArgs e)
@@ -375,5 +442,33 @@ namespace SocketAsyncEventArgsOfficeDemo
                 MessageBox.Show("没有查询到接近的用户");
             }
         }
+
+        public static void DeleteFriendMessage(SocketAsyncEventArgs e)
+        {
+            MClient mClient = MClient.CreateInstance();
+            AsyncUserToken token = (AsyncUserToken)e.UserToken;
+            //得到一个完整的包的数据，放入新list,第二个参数是数据长度，所以要减去8  
+            List<byte> onePackage = token.receiveBuffer.GetRange(8, token.packageLen - 8);
+            //将复制出来的数据从receiveBuffer旧list中删除
+            token.receiveBuffer.RemoveRange(0, token.packageLen);
+            //list要先转换成数组，再转换成字符串
+            String jsonStr = Encoding.Default.GetString(onePackage.ToArray());
+            //得到用户名和密码
+            Console.WriteLine("jsonStr = " + jsonStr);
+            JObject obj = JObject.Parse(jsonStr);
+
+            //先从数据库中删除
+            SqliteConnect.DeleteFriendById(obj["Id"].ToString());
+            //然后从好友队列中删除
+            Application.Current.Dispatcher.Invoke(
+                new Action(() =>
+                {
+                    FriendListViewModel friendListViewModel = FriendListViewModel.CreateInstance();
+                    FriendEntity.InGroupListDelete(friendListViewModel.friendGroups, obj["Id"].ToString());
+                })
+                );
+
+        }
+        
     }
 }

@@ -5,49 +5,61 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MISMC.Windows"
         mc:Ignorable="d"
-        Title="FriendInfo" Height="432.447" Width="503.191">
-    <Grid>
-        <Grid Margin="0,0,3.6,-2">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="50"></RowDefinition>
-                <RowDefinition Height="50"></RowDefinition>
-                <RowDefinition Height="50"></RowDefinition>
-                <RowDefinition Height="50"></RowDefinition>
-                <RowDefinition Height="50"></RowDefinition>
-                <RowDefinition Height="50"></RowDefinition>
-                <RowDefinition Height="50"></RowDefinition>
-                <RowDefinition Height="50"></RowDefinition>
-                <RowDefinition Height="50"></RowDefinition>
-                <RowDefinition Height="50"></RowDefinition>
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="200"></ColumnDefinition>
-                <ColumnDefinition Width="200"></ColumnDefinition>
-                <ColumnDefinition Width="100"></ColumnDefinition>
-            </Grid.ColumnDefinitions>
-            <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" TextAlignment="Center">用户名:</TextBlock>
-            <TextBlock Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" TextAlignment="Center" Text="{Binding UserName}"></TextBlock>
+        Title="{Binding UserName}" Height="192.993" Width="201.193" AllowsTransparency="True" WindowStyle="None"
+        WindowStartupLocation="CenterScreen"
+        Background="#D1FCB5">
 
-            <TextBlock Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" TextAlignment="Center" >真实姓名:</TextBlock>
-            <TextBlock Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" TextAlignment="Center" Text="{Binding RealName}"></TextBlock>
+    <StackPanel>
+        <DockPanel Grid.Row="0"  Height="25" MouseMove="TitleBar_MouseMove" MouseDown="TitleBar_MouseDown" Background="#4C9CFB" DockPanel.Dock="Top">
+            <TextBlock Name="txtTitle" Margin="1,0,0,0"  Padding="5,3,2,3" Text="{Binding UserName}" 
+                   HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="14" FontFamily="微软雅黑"  
+                   Foreground="White"/>
+            <StackPanel Width="auto" HorizontalAlignment="Right" Orientation="Horizontal">
+                <Button HorizontalAlignment="Right" Width="25" Foreground="White" Background="#4C9CFB" x:Name="btn_min" Content="-"  
+                             Click="btn_min_Click" Grid.Column="0"/>
+                <Button HorizontalAlignment="Right" Width="25" Foreground="White" Background="#4C9CFB" x:Name="btn_close"  Content="×"  
+                             Click="btn_close_Click" Grid.Column="0"/>
+            </StackPanel>
+        </DockPanel>
 
-            <TextBlock Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" TextAlignment="Center">性 别:</TextBlock>
-            <TextBlock Grid.Row="2" Grid.Column="1" VerticalAlignment="Center" TextAlignment="Center" Text="{Binding Sex}"></TextBlock>
+        <Grid>
+            <StackPanel Margin="0,0,3.6,-2">
 
-            <TextBlock Grid.Row="3" Grid.Column="0" VerticalAlignment="Center" TextAlignment="Center">生 日:</TextBlock>
-            <TextBlock Grid.Row="3" Grid.Column="1" VerticalAlignment="Center" TextAlignment="Center" Text="{Binding BirthDay}"></TextBlock>
+                <TextBlock FontSize="30" HorizontalAlignment="Left" Margin="10,0,0,0" Foreground="#3CA586" VerticalAlignment="Center" TextAlignment="Center" Text="{Binding UserName}"></TextBlock>
 
-            <TextBlock Grid.Row="4" Grid.Column="0" VerticalAlignment="Center" TextAlignment="Center">地 址:</TextBlock>
-            <TextBlock Grid.Row="4" Grid.Column="1" VerticalAlignment="Center" TextAlignment="Center" Text="{Binding Address}"></TextBlock>
+                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10,0,0,0" TextAlignment="Center" Text="{Binding Remark}" Foreground="#48715B"></TextBlock>
 
-            <TextBlock Grid.Row="5" Grid.Column="0" VerticalAlignment="Center" TextAlignment="Center">邮 箱:</TextBlock>
-            <TextBlock Grid.Row="5" Grid.Column="1" VerticalAlignment="Center" TextAlignment="Center" Text="{Binding Email}"></TextBlock>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock  VerticalAlignment="Center"  FontFamily="微软雅黑" Foreground="#C7C1AB" Margin="10,0,5,0" HorizontalAlignment="Left" TextAlignment="Center" >RealName:</TextBlock>
+                    <TextBlock  VerticalAlignment="Center"  FontFamily="微软雅黑" Foreground="#C7C1AB" HorizontalAlignment="Left" TextAlignment="Center" Text="{Binding RealName}"></TextBlock>
+                </StackPanel>
 
-            <TextBlock Grid.Row="6" Grid.Column="0" VerticalAlignment="Center" TextAlignment="Center">电 话:</TextBlock>
-            <TextBlock Grid.Row="6" Grid.Column="1" VerticalAlignment="Center" TextAlignment="Center" Text="{Binding PhoneNumber}"></TextBlock>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock  VerticalAlignment="Center"  FontFamily="微软雅黑" Foreground="#C7C1AB" Margin="10,0,5,0" HorizontalAlignment="Left" TextAlignment="Center" >Sex:</TextBlock>
+                    <TextBlock  VerticalAlignment="Center"  FontFamily="微软雅黑" Foreground="#C7C1AB" HorizontalAlignment="Left" TextAlignment="Center" Text="{Binding Sex}"></TextBlock>
+                </StackPanel>
 
-            <TextBlock Grid.Row="7" Grid.Column="0" VerticalAlignment="Center" TextAlignment="Center">签 名:</TextBlock>
-            <TextBlock Grid.Row="7" Grid.Column="1" VerticalAlignment="Center" TextAlignment="Center" Text="{Binding Remark}"></TextBlock>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock  VerticalAlignment="Center"  FontFamily="微软雅黑" Foreground="#C7C1AB" Margin="10,0,5,0" HorizontalAlignment="Left" TextAlignment="Center" >BirthDay:</TextBlock>
+                    <TextBlock  VerticalAlignment="Center"  FontFamily="微软雅黑" Foreground="#C7C1AB" HorizontalAlignment="Left" TextAlignment="Center" Text="{Binding BirthDay}"></TextBlock>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock  VerticalAlignment="Center"  FontFamily="微软雅黑" Foreground="#C7C1AB" Margin="10,0,5,0" HorizontalAlignment="Left" TextAlignment="Center" >Address:</TextBlock>
+                    <TextBlock  VerticalAlignment="Center"  FontFamily="微软雅黑" Foreground="#C7C1AB" HorizontalAlignment="Left" TextAlignment="Center" Text="{Binding Address}"></TextBlock>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock  VerticalAlignment="Center"  FontFamily="微软雅黑" Foreground="#C7C1AB" Margin="10,0,5,0" HorizontalAlignment="Left" TextAlignment="Center" >Email:</TextBlock>
+                    <TextBlock  VerticalAlignment="Center"  FontFamily="微软雅黑" Foreground="#C7C1AB" HorizontalAlignment="Left" TextAlignment="Center" Text="{Binding Email}"></TextBlock>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock  VerticalAlignment="Center"  FontFamily="微软雅黑" Foreground="#C7C1AB" Margin="10,0,5,0" HorizontalAlignment="Left" TextAlignment="Center" >PhoneNumber:</TextBlock>
+                    <TextBlock  VerticalAlignment="Center"  FontFamily="微软雅黑" Foreground="#C7C1AB" HorizontalAlignment="Left" TextAlignment="Center" Text="{Binding PhoneNumber}"></TextBlock>
+                </StackPanel>
+
+            </StackPanel>
         </Grid>
-    </Grid>
+    </StackPanel>
 </Window>

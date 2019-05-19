@@ -322,6 +322,16 @@ namespace MISMC.ViewModel
             InfoBt.Header = "详细信息";
             InfoBt.Click += OpenInfo;
             contextMenu.Items.Add(InfoBt);
+
+            MenuItem groupBt = new MenuItem();
+            groupBt.Header = "更换分组";
+            groupBt.Click += ChangeGroup;
+            contextMenu.Items.Add(groupBt);
+
+            MenuItem deleteBt = new MenuItem();
+            deleteBt.Header = "删除好友";
+            deleteBt.Click += DeleteFriend;
+            contextMenu.Items.Add(deleteBt);
         }
 
         public static FriendEntity InGroup(ref ObservableCollection<FriendEntity> friendGroup, String name)
@@ -363,6 +373,31 @@ namespace MISMC.ViewModel
             FriendEntity friendentity = new FriendEntity();
             friendGroup.FriendGroupAdd(ref friendentity);
             return friendentity;
+        }
+
+        //从整个好友列表中删除对应的对象
+        public static void InGroupListDelete(ObservableCollection<FriendGroup> friendGroups, String id)
+        {
+            FriendGroup friendGroup = null;
+            FriendEntity friendEntity =null;
+            foreach (var group in friendGroups)
+            {
+                foreach(var entity in group.Friends)
+                {
+                    if (entity.Id == id)
+                    {
+                        friendGroup = group;
+                        friendEntity = entity;
+                        break;
+                    }
+                }
+            }
+            //删除对应的对象
+            friendGroup.Friends.Remove(friendEntity);
+            if (friendGroup.Friends.Count == 0)
+            {
+                friendGroups.Remove(friendGroup);
+            }
         }
 
         //用于ContextMenu选项单机注册
@@ -410,6 +445,45 @@ namespace MISMC.ViewModel
                 chatViewModel.ChatSet(FriendListViewModel.username, this.Id, this.Name, this.RealName, this.Sex, this.BirthDay, this.Address, this.Email, this.PhoneNumber, this.Remarks);
                 chatWindow.Show();
             }
+        }
+
+        //更换分组的函数
+        public void ChangeGroup(object sender, RoutedEventArgs e)
+        {
+            //弹出一个分组改变窗口
+            ChangeGroupWindow changeGroupWindow = new ChangeGroupWindow();
+            //拿到viewmodel
+            ChangGroupViewModel viewModel = (ChangGroupViewModel)changeGroupWindow.DataContext;
+            //拿到好友的id
+            viewModel.FriendId = this.Id;
+            changeGroupWindow.ShowDialog();
+        }
+
+        //删除好友
+        public void DeleteFriend(object sender, RoutedEventArgs e)
+        {
+            MessageBoxResult result = MessageBox.Show("删除该好友？", "提示", MessageBoxButton.OKCancel, MessageBoxImage.Question);
+            if (MessageBoxResult.OK == result)
+            {
+                //进行删除好友的操作
+                //将删除好友的信息发送给服务端，由服务端同时删除用户和好友的好友表中的对应ID
+                JObject obj = new JObject();
+                obj["Id"] = this.Id;
+                String str = obj.ToString();
+                MClient mClient = MClient.CreateInstance();
+                mClient.SendDeleteFriend(str);
+                //同时客户端本地将该好友从队列中删除
+                SqliteConnect.DeleteFriendById(this.Id);
+                //然后从好友队列中删除
+                Application.Current.Dispatcher.Invoke(
+                new Action(() =>
+                {
+                    FriendListViewModel friendListViewModel = FriendListViewModel.CreateInstance();
+                    FriendEntity.InGroupListDelete(friendListViewModel.friendGroups, this.Id);
+                })
+                );
+            }
+
         }
 
         //右键事件，打开选项菜单

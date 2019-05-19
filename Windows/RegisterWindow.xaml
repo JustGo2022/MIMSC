@@ -7,8 +7,198 @@
         xmlns:c1="clr-namespace:MyMVVM"
         xmlns:local="clr-namespace:MISMC.Windows"
         mc:Ignorable="d"
-        Title="RegisterWindow" Height="570" Width="500">
+        Title="注册" Height="570" Width="340"
+        Background="AliceBlue" Visibility="Visible" WindowStyle="None" AllowsTransparency="True"
+        WindowStartupLocation="CenterScreen">
+
+    <Window.Resources>
+        <Style x:Key="txtTest"  TargetType="{x:Type TextBox}">
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Grid x:Name="Grid">
+                            <Border x:Name="Border" SnapsToDevicePixels="True"
+                                CornerRadius="1"
+                                BorderBrush="LightGray" BorderThickness="2" Background="White" />
+                            <ScrollViewer x:Name="PART_ContentHost" BorderThickness="0"
+IsTabStop="False" Margin="2" VerticalAlignment="Stretch"  />
+
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Border" Property="BorderBrush" Value="Blue"/>
+                                <Setter TargetName="Border" Property="Opacity" Value="0.2"/>
+                            </Trigger>
+
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter TargetName="Border" Property="BorderBrush" Value="Blue"/>
+                                <Setter TargetName="Border" Property="Opacity" Value="0.5"/>
+                            </Trigger>
+
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Grid" Property="Opacity" Value="0.2" />
+                            </Trigger>
+
+                            <Trigger Property="IsReadOnly" Value="True">
+                                <Setter TargetName="Grid" Property="IsEnabled" Value="False" />
+                                <Setter TargetName="Border" Property="Opacity" Value="0.2" />
+                                <Setter TargetName="PART_ContentHost" Property="Opacity" Value="0.5" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="TextBoxStyle1" BasedOn="{x:Null}" TargetType="{x:Type TextBox}">
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+            <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="1"/>
+            <Setter Property="AllowDrop" Value="true"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="ScrollViewer.PanningMode" Value="VerticalFirst"/>
+            <Setter Property="Stylus.IsFlicksEnabled" Value="False"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type TextBox}">
+                        <Border x:Name="Bd" SnapsToDevicePixels="true" BorderBrush="#FFDDDDDD" BorderThickness="1" ClipToBounds="False" CornerRadius="5">
+                            <Border.Effect>
+                                <DropShadowEffect Color="White" Direction="0" ShadowDepth="0" BlurRadius="10"/>
+                            </Border.Effect>
+                            <!--这个Border主要用来遮挡框内的阴影，只要外阴影，如果只要内阴影不要外阴影，那么设置border的 ClipToBounds="True"  剪切外部内容，即可实现内阴影-->
+                            <Border Background="White" CornerRadius="5">
+                                <ScrollViewer x:Name="PART_ContentHost" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="{x:Null}">
+                                </ScrollViewer>
+                            </Border>
+                        </Border>
+                        <ControlTemplate.Triggers>
+
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="BorderBrush" TargetName="Bd" Value="#FF66AFE9"/>
+                            </Trigger>
+
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter Property="Effect" TargetName="Bd">
+                                    <Setter.Value>
+                                        <DropShadowEffect BlurRadius="10" Color="#FFE5F2FC" Direction="0" ShadowDepth="0"/>
+                                    </Setter.Value>
+                                </Setter>
+                                <Setter Property="BorderBrush" TargetName="Bd" Value="#FF66AFE9"/>
+                            </Trigger>
+
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="PasswordBoxStyle1" BasedOn="{x:Null}" TargetType="{x:Type PasswordBox}">
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+            <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="1"/>
+            <Setter Property="AllowDrop" Value="true"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="ScrollViewer.PanningMode" Value="VerticalFirst"/>
+            <Setter Property="Stylus.IsFlicksEnabled" Value="False"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type PasswordBox}">
+                        <Border x:Name="Bd" SnapsToDevicePixels="true" BorderBrush="#FFDDDDDD" BorderThickness="1" ClipToBounds="False" CornerRadius="5">
+                            <Border.Effect>
+                                <DropShadowEffect Color="White" Direction="0" ShadowDepth="0" BlurRadius="10"/>
+                            </Border.Effect>
+                            <!--这个Border主要用来遮挡框内的阴影，只要外阴影，如果只要内阴影不要外阴影，那么设置border的 ClipToBounds="True"  剪切外部内容，即可实现内阴影-->
+                            <Border Background="White" CornerRadius="5">
+                                <ScrollViewer x:Name="PART_ContentHost" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="{x:Null}">
+                                </ScrollViewer>
+                            </Border>
+                        </Border>
+                        <ControlTemplate.Triggers>
+
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="BorderBrush" TargetName="Bd" Value="#FF66AFE9"/>
+                            </Trigger>
+
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter Property="Effect" TargetName="Bd">
+                                    <Setter.Value>
+                                        <DropShadowEffect BlurRadius="10" Color="#FFE5F2FC" Direction="0" ShadowDepth="0"/>
+                                    </Setter.Value>
+                                </Setter>
+                                <Setter Property="BorderBrush" TargetName="Bd" Value="#FF66AFE9"/>
+                            </Trigger>
+
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="TextBlockStyle1" BasedOn="{x:Null}" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="Background" Value="Aquamarine"/>
+            <Setter Property="Padding" Value="1"/>
+            <Setter Property="AllowDrop" Value="true"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="ScrollViewer.PanningMode" Value="VerticalFirst"/>
+            <Setter Property="Stylus.IsFlicksEnabled" Value="False"/>
+            
+        </Style>
+
+        <Style x:Key="FilletButton" TargetType="{x:Type Button}" >
+            <Setter Property="Background" Value="AliceBlue"></Setter>
+            <Setter Property="Foreground" Value="Black"></Setter>
+            <Setter Property="BorderBrush" Value="Aqua"></Setter>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border x:Name="border" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" 
+                                SnapsToDevicePixels="true" CornerRadius="6,6,6,6">
+                            <ContentPresenter x:Name="contentPresenter" 
+                                              Focusable="False" 
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
+                                              Margin="{TemplateBinding Padding}" 
+                                              RecognizesAccessKey="True" 
+                                              SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"  />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="true">
+                                <Setter Property="Background" TargetName="border" Value="SpringGreen"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </Window.Resources>
+    
+
     <StackPanel>
+        <Button Style="{StaticResource FilletButton}" Content="图片选择" VerticalAlignment="Center" Width="100">
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="Click">
+                    <c1:MyEventCommand Command="{Binding  BtChooseJpj}"/>
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+        </Button>
+        <DockPanel  Height="25" MouseMove="TitleBar_MouseMove" MouseDown="TitleBar_MouseDown" Background="#4C9CFB" DockPanel.Dock="Top">
+            <TextBlock Name="txtTitle" Margin="1,0,0,0"  Padding="5,3,2,3" Text="注册" 
+                   HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="14" FontFamily="微软雅黑"  
+                   Foreground="White"/>
+            <StackPanel Width="auto" HorizontalAlignment="Right" Orientation="Horizontal">
+                <Button HorizontalAlignment="Right" Width="25" Foreground="White" Background="#4C9CFB" x:Name="btn_min" Content="-"  
+                             Click="btn_min_Click" Grid.Column="0"/>
+                <Button HorizontalAlignment="Right" Width="25" Foreground="White" Background="#4C9CFB" x:Name="btn_close"  Content="×"  
+                             Click="btn_close_Click" Grid.Column="0"/>
+            </StackPanel>
+        </DockPanel>
+
         <Grid Margin="0,0,3.6,-2">
             <Grid.RowDefinitions>
                 <RowDefinition Height="50"></RowDefinition>
@@ -23,51 +213,145 @@
                 <RowDefinition Height="50"></RowDefinition>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="200"></ColumnDefinition>
+                <ColumnDefinition Width="100"></ColumnDefinition>
                 <ColumnDefinition Width="200"></ColumnDefinition>
                 <ColumnDefinition Width="100"></ColumnDefinition>
             </Grid.ColumnDefinitions>
-            <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" TextAlignment="Center">用户名:</TextBlock>
-            <TextBox Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" TextAlignment="Center" Text="{Binding UserName}"></TextBox>
-            <TextBlock Grid.Row="0" Grid.Column="2" VerticalAlignment="Center" TextAlignment="Center"></TextBlock>
+            <TextBlock  Style="{StaticResource TextBlockStyle1}" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" TextAlignment="Center">用户名:</TextBlock>
+            <StackPanel Margin="0,15,0,0" Grid.Row="0" Grid.Column="1">
+                <TextBox  Style="{StaticResource TextBoxStyle1}" VerticalAlignment="Center"  Text="{Binding UserName,UpdateSourceTrigger=PropertyChanged}">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="PreviewTextInput">
+                            <c1:MyEventCommand Command="{Binding  TbUserName}" CommandParateter="{Binding ElementName=tbUserNameTips}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </TextBox>
+                <TextBlock  x:Name="tbUserNameTips"   VerticalAlignment="Center" >
+                </TextBlock>
+            </StackPanel>
 
-            <TextBlock Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" TextAlignment="Center">密 码:</TextBlock>
-            <TextBox Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" TextAlignment="Center" Text="{Binding PassWord}"></TextBox>
-            <TextBlock Grid.Row="1" Grid.Column="2" VerticalAlignment="Center" TextAlignment="Center"></TextBlock>
+            <TextBlock Style="{StaticResource TextBlockStyle1}" Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" TextAlignment="Center">密 码:</TextBlock>
+            <StackPanel Margin="0,15,0,0" Grid.Row="1" Grid.Column="1">
+                <PasswordBox Style="{StaticResource PasswordBoxStyle1}"  VerticalAlignment="Center"  x:Name="tbPassword">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="PasswordChanged">
+                            <c1:MyEventCommand Command="{Binding  PbPassword}" CommandParateter="{Binding ElementName=tbPassword}"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="PasswordChanged">
+                            <c1:MyEventCommand Command="{Binding  TbPassWord}" CommandParateter="{Binding ElementName=tbPassWordTips}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </PasswordBox>
+                <TextBlock  x:Name="tbPassWordTips" VerticalAlignment="Center" ></TextBlock>
+            </StackPanel>
 
-            <TextBlock Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" TextAlignment="Center" >确认密码:</TextBlock>
-            <TextBox Grid.Row="2" Grid.Column="1" VerticalAlignment="Center" TextAlignment="Center" Text="{Binding sPassWord}"></TextBox>
-            <TextBlock Grid.Row="2" Grid.Column="2" VerticalAlignment="Center" TextAlignment="Center"></TextBlock>
 
-            <TextBlock Grid.Row="3" Grid.Column="0" VerticalAlignment="Center" TextAlignment="Center" >真实姓名:</TextBlock>
-            <TextBox Grid.Row="3" Grid.Column="1" VerticalAlignment="Center" TextAlignment="Center" Text="{Binding RealName}"></TextBox>
-            <TextBlock Grid.Row="3" Grid.Column="2" VerticalAlignment="Center" TextAlignment="Center"></TextBlock>
+            <TextBlock Style="{StaticResource TextBlockStyle1}" Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" TextAlignment="Center" >确认密码:</TextBlock>
+            <StackPanel Margin="0,15,0,0" Grid.Row="2" Grid.Column="1">
+                <PasswordBox Style="{StaticResource PasswordBoxStyle1}" VerticalAlignment="Center"  x:Name="tbSPassword">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="PasswordChanged">
+                            <c1:MyEventCommand Command="{Binding  PbSPassword}" CommandParateter="{Binding ElementName=tbSPassword}"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="PasswordChanged">
+                            <c1:MyEventCommand Command="{Binding  TbSPassWord}" CommandParateter="{Binding ElementName=tbSPassWordTips}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </PasswordBox>
+                <TextBlock  x:Name="tbSPassWordTips" VerticalAlignment="Center" ></TextBlock>
+            </StackPanel>
 
-            <TextBlock Grid.Row="4" Grid.Column="0" VerticalAlignment="Center" TextAlignment="Center">性 别:</TextBlock>
-            <TextBox Grid.Row="4" Grid.Column="1" VerticalAlignment="Center" TextAlignment="Center" Text="{Binding Sex}"></TextBox>
+            <TextBlock Style="{StaticResource TextBlockStyle1}" Grid.Row="3" Grid.Column="0" VerticalAlignment="Center" TextAlignment="Center" >真实姓名:</TextBlock>
+            <StackPanel Margin="0,15,0,0" Grid.Row="3" Grid.Column="1">
+                <TextBox Style="{StaticResource TextBoxStyle1}"  VerticalAlignment="Center"  Text="{Binding RealName,UpdateSourceTrigger=PropertyChanged}">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="TextChanged">
+                            <c1:MyEventCommand Command="{Binding  TbRealName}" CommandParateter="{Binding ElementName=tbRealNameTips}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </TextBox>
+                <TextBlock  x:Name="tbRealNameTips"   VerticalAlignment="Center" ></TextBlock>
+            </StackPanel>
+
+            <TextBlock Style="{StaticResource TextBlockStyle1}" Grid.Row="4" Grid.Column="0" VerticalAlignment="Center" TextAlignment="Center">性 别:</TextBlock>
+            <StackPanel Grid.Row="4" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" >
+                <RadioButton Content="男" Width="90">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="Click">
+                            <c1:MyEventCommand Command="{Binding  BtMaleSexRadio}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </RadioButton>
+                <RadioButton Content="女 " Width="59">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="Changed">
+                            <c1:MyEventCommand Command="{Binding  BtSheMaleSexRadio}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </RadioButton>
+            </StackPanel>
             <TextBlock Grid.Row="4" Grid.Column="2" VerticalAlignment="Center" TextAlignment="Center"></TextBlock>
 
-            <TextBlock Grid.Row="5" Grid.Column="0" VerticalAlignment="Center" TextAlignment="Center">生 日:</TextBlock>
-            <TextBox Grid.Row="5" Grid.Column="1" VerticalAlignment="Center" TextAlignment="Center" Text="{Binding BirthDay}"></TextBox>
+            <TextBlock Style="{StaticResource TextBlockStyle1}" Grid.Row="5" Grid.Column="0" VerticalAlignment="Center" TextAlignment="Center">生 日:</TextBlock>
+            <DatePicker x:Name="datepicker" Grid.Row="5" Grid.Column="1" VerticalAlignment="Center"  DisplayDate="1995-01-01" SelectedDateFormat="Long" >
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="SelectedDateChanged">
+                        <c1:MyEventCommand Command="{Binding  BtDateChanged}" CommandParateter="{Binding ElementName=datepicker}"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </DatePicker>
             <TextBlock Grid.Row="5" Grid.Column="2" VerticalAlignment="Center" TextAlignment="Center"></TextBlock>
 
-            <TextBlock Grid.Row="6" Grid.Column="0" VerticalAlignment="Center" TextAlignment="Center">地 址:</TextBlock>
-            <TextBox Grid.Row="6" Grid.Column="1" VerticalAlignment="Center" TextAlignment="Center" Text="{Binding Address}"></TextBox>
-            <TextBlock Grid.Row="6" Grid.Column="2" VerticalAlignment="Center" TextAlignment="Center"></TextBlock>
+            <TextBlock Style="{StaticResource TextBlockStyle1}" Grid.Row="6" Grid.Column="0" VerticalAlignment="Center" TextAlignment="Center">地 址:</TextBlock>
+            <StackPanel Margin="0,15,0,0" Grid.Row="6" Grid.Column="1">
+                <TextBox Style="{StaticResource TextBoxStyle1}"  VerticalAlignment="Center"  Text="{Binding Address,UpdateSourceTrigger=PropertyChanged}">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="TextChanged">
+                            <c1:MyEventCommand Command="{Binding  TbAddress}" CommandParateter="{Binding ElementName=tbAddressTips}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </TextBox>
+                <TextBlock  x:Name="tbAddressTips"   VerticalAlignment="Center" ></TextBlock>
+            </StackPanel>
 
-            <TextBlock Grid.Row="7" Grid.Column="0" VerticalAlignment="Center" TextAlignment="Center">邮 箱:</TextBlock>
-            <TextBox Grid.Row="7" Grid.Column="1" VerticalAlignment="Center" TextAlignment="Center" Text="{Binding Email}"></TextBox>
-            <TextBlock Grid.Row="7" Grid.Column="2" VerticalAlignment="Center" TextAlignment="Center"></TextBlock>
+            <TextBlock Style="{StaticResource TextBlockStyle1}" Grid.Row="7" Grid.Column="0" VerticalAlignment="Center" TextAlignment="Center">邮 箱:</TextBlock>
+            <StackPanel Margin="0,15,0,0" Grid.Row="7" Grid.Column="1">
+                <TextBox Style="{StaticResource TextBoxStyle1}"  VerticalAlignment="Center"  Text="{Binding Email,UpdateSourceTrigger=PropertyChanged}">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="TextChanged">
+                            <c1:MyEventCommand Command="{Binding  TbEmail}" CommandParateter="{Binding ElementName=tbEmailTips}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </TextBox>
+                <TextBlock  x:Name="tbEmailTips"   VerticalAlignment="Center" ></TextBlock>
+            </StackPanel>
 
-            <TextBlock Grid.Row="8" Grid.Column="0" VerticalAlignment="Center" TextAlignment="Center">电 话:</TextBlock>
-            <TextBox Grid.Row="8" Grid.Column="1" VerticalAlignment="Center" TextAlignment="Center" Text="{Binding PhoneNumber}"></TextBox>
-            <TextBlock Grid.Row="8" Grid.Column="2" VerticalAlignment="Center" TextAlignment="Center"></TextBlock>
+            <TextBlock Style="{StaticResource TextBlockStyle1}" Grid.Row="8" Grid.Column="0" VerticalAlignment="Center" TextAlignment="Center">电 话:</TextBlock>
+            <StackPanel Margin="0,15,0,0" Grid.Row="8" Grid.Column="1">
+                <TextBox Style="{StaticResource TextBoxStyle1}"  VerticalAlignment="Center"  Text="{Binding PhoneNumber,UpdateSourceTrigger=PropertyChanged}">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="TextChanged">
+                            <c1:MyEventCommand Command="{Binding  TbPhoneNumber}" CommandParateter="{Binding ElementName=tbPhoneNumberTips}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </TextBox>
+                <TextBlock  x:Name="tbPhoneNumberTips"   VerticalAlignment="Center" ></TextBlock>
+            </StackPanel>
 
-            <TextBlock Grid.Row="9" Grid.Column="0" VerticalAlignment="Center" TextAlignment="Center">签 名:</TextBlock>
-            <TextBox Grid.Row="9" Grid.Column="1" VerticalAlignment="Center" TextAlignment="Center" Text="{Binding Remark}"></TextBox>
-            <TextBlock Grid.Row="9" Grid.Column="2" VerticalAlignment="Center" TextAlignment="Center"></TextBlock>
+            <TextBlock Style="{StaticResource TextBlockStyle1}" Grid.Row="9" Grid.Column="0" VerticalAlignment="Center" TextAlignment="Center">签 名:</TextBlock>
+            <StackPanel Margin="0,15,0,0" Grid.Row="9" Grid.Column="1">
+                <TextBox Style="{StaticResource TextBoxStyle1}"  VerticalAlignment="Center"  Text="{Binding Remark,UpdateSourceTrigger=PropertyChanged}">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="TextChanged">
+                            <c1:MyEventCommand Command="{Binding  TbRemark}" CommandParateter="{Binding ElementName=tbRemarkTips}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </TextBox>
+                <TextBlock  x:Name="tbRemarkTips"   VerticalAlignment="Center" ></TextBlock>
+            </StackPanel>
+            
         </Grid>
-        <Grid>
+        <Grid Height="50">
             <Grid.RowDefinitions>
                 <RowDefinition></RowDefinition>
             </Grid.RowDefinitions>
@@ -75,20 +359,27 @@
                 <ColumnDefinition></ColumnDefinition>
                 <ColumnDefinition></ColumnDefinition>
             </Grid.ColumnDefinitions>
-            <Button Grid.Row="0" Grid.Column="0" Content="注册" VerticalAlignment="Center" Width="100">
+            <Button Style="{StaticResource  FilletButton}" Grid.Row="0" Grid.Column="0" Content="注册" IsHitTestVisible="{Binding isRegist}" VerticalAlignment="Center" Width="100">
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="Click">
                         <c1:MyEventCommand Command="{Binding  BtRegister}"/>
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
             </Button>
-            <Button Grid.Row="0" Grid.Column="1" Content="重置" VerticalAlignment="Center" Width="100">
+            <Button Style="{StaticResource FilletButton}" Grid.Row="0" Grid.Column="1" Content="重置" VerticalAlignment="Center" Width="100">
                 <i:Interaction.Triggers>
                 <i:EventTrigger EventName="Click">
                     <c1:MyEventCommand Command="{Binding  BtResetting}"/>
                 </i:EventTrigger>
                 </i:Interaction.Triggers>
             </Button>
+            
+
+    
         </Grid>
+        
     </StackPanel>
+    
+    
+    
 </Window>

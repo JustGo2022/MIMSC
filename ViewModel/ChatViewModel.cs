@@ -10,6 +10,9 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Documents;
+using System.Windows.Media;
 
 namespace MISMC.ViewModel
 {
@@ -17,6 +20,8 @@ namespace MISMC.ViewModel
     {
         public ChatViewModel()
         {
+            Mess = "";
+            isSend = "false";
             MessageMixGroup = new ObservableCollection<MessageMix>();
             this.DbMessCount = 0;
             //启动一个线程，这个线程负责更新聊天消息
@@ -219,6 +224,20 @@ namespace MISMC.ViewModel
             }
         }
 
+        private String issend;
+        public String isSend
+        {
+            get { return issend; }
+            set
+            {
+                if (issend != value)
+                {
+                    issend = value;
+                    RaisePropertyChanged("isSend");
+                }
+            }
+        }
+
         private ObservableCollection<MessageMix> _messageMixGroup;
         public ObservableCollection<MessageMix> MessageMixGroup
         {
@@ -290,6 +309,39 @@ namespace MISMC.ViewModel
             }
         }
 
+        private MyCommand<TextBlock> tbMess;
+        public MyCommand<TextBlock> TbMess
+        {
+            get
+            {
+                if (tbMess == null)
+                    tbMess = new MyCommand<TextBlock>(
+                            para =>
+                            {
+                                String splist = "";
+                                para.Inlines.Clear();
+
+                                if (Encoding.Default.GetByteCount(Mess) > 255)
+                                {
+                                    isSend = "false";
+                                    splist = "长度为1-255个字节";
+                                }
+                                else if (Encoding.Default.GetByteCount(Mess) <= 0)
+                                {
+                                    isSend = "false";
+                                    splist = "";
+                                }
+                                else
+                                {
+                                    isSend = "true";
+                                    splist = "";
+                                }
+                                para.Inlines.Add(new Run(splist) { Foreground = Brushes.Red });
+                                //this.RigistButtonCheck();
+                            });
+                return tbMess;
+            }
+        }
     }
 
     class MessageMix

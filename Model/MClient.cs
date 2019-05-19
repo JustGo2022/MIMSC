@@ -312,6 +312,18 @@ namespace SocketAsyncEventArgsOfficeDemo
             this.SendMessage(11, str, sendSAEA);
         }
 
+        //发送分组改变消息
+        public void SendChangeGroup(String str)
+        {
+            this.SendMessage(12, str, sendSAEA);
+        }
+
+        //发送好友删除消息
+        public void SendDeleteFriend(String str)
+        {
+            this.SendMessage(14, str, sendSAEA);
+        }
+
         //发送聊天消息
         public void SendRegister(String userName, String passWord, String realName, String Sex, String birthDay, String Address, String Email, String phoneNumber, String remark)
         {
